@@ -43,16 +43,18 @@
 </div>
 <div class="w3-container" id="respuestas"></div>  
 <script>
-let usage = {
+var usage = {
   completion_tokens: 0,
   prompt_tokens: 0
 };
+
+var resumen = "";
   
-let API_KEY = localStorage.getItem("API_KEY");
+var API_KEY = localStorage.getItem("API_KEY");
 if(API_KEY){
   document.getElementById("llave").value = "******";
 }
-let custom = localStorage.getItem("custom");
+var custom = localStorage.getItem("custom");
 if(custom){
   document.getElementById("custom").value = custom;
 }
@@ -106,6 +108,7 @@ function resumir(nuevo){
     });
     enviarGPT(losMensajes).then(res => {
         resumen = res;
+        console.log(resumen);
         printContador();
     });
 }
