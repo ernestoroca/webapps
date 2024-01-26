@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Web Apps</title>
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+</head>
+<body>
+<div class="w3-container">
+  <div class="w3-card-4">
+    <div class="w3-container w3-green">
+      <h2>Chat Config</h2>
+    </div>
+    <form class="w3-container">
+      <p>
+        <label>Key</label>
+        <input class="w3-input" type="text" id="llave">
+      </p>
+      <p>
+        <label>Instruccion</label>
+        <textarea id="w3review" name="w3review" rows="4" cols="80" id="custom"></textarea>
+      </p>
+      <p>
+        <button class="w3-button w3-white w3-border w3-border-red w3-round-large" id="configurar">Configurar</button>
+      </p>
+    </form>
+  </div>
+</div>
+<div class="w3-container">
+  <div class="w3-card-4">
+    <div class="w3-container w3-green">
+      <h2>Pregunta</h2>
+    </div>
+    <form class="w3-container">
+      <p>
+        <textarea id="w3review" name="w3review" rows="4" cols="80" id="pregunta"></textarea>
+      </p>
+      <p>
+        <button class="w3-button w3-white w3-border w3-border-red w3-round-large" id="preguntar">Enviar</button>
+      </p>
+    </form>
+  </div>
+</div>
+<div class="w3-container">
+  <div class="w3-panel w3-pale-blue w3-leftbar w3-rightbar w3-border-blue" id="respuesta">
+  </div>
+</div>  
+<script>
+
+let API_KEY = "";
+let custom = "";
+
+function enviarGPT(losMensajes){
+    return fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${API_KEY}`,
+        },
+        body: JSON.stringify({
+            model: 'gpt-4-1106-preview',
+            messages: losMensajes,
+            temperature: 0.5,
+            top_p: 0.7,
+            n: 1,
+            stream: false,
+            presence_penalty: 0,
+            frequency_penalty: 0,
+        }),
+    }).then(response => {
+        if (!response.ok) {
+            console.log(response);
+            return Promise.reject(Error("No se pudo responder"));
+        }
+        return response.json();
+    }).then(data => {
+        return Promise.resolve(data.choices[0].message.content);
+    })
+}
+
+document.getElementById("configurar").onclick = function(){
+  API_KEY = document.getElementById("llave").value;
+  custom = document.getElementById("custom").value;
+};
+document.getElementById("preguntar").onclick = function(){
+  let pregunta = document.getElementById("pregunta").value;
+  let losMensajes = [];
+  losMensajes.push({
+    "role":"system",
+    "content":custom
+  });
+  losMensajes.push({
+    "role":"user",
+    "content":pregunta
+  });
+  return enviarGPT(losMensajes).then(res => {
+    document.getElementById('respuesta').innerHTML = res;
+  });
+};
+
+
+
+/*                          Input                   Outpu
+gpt-4-1106-preview          $0.0100;	$0.0300
+gpt-4-1106-vision-preview	  $0.0100;	$0.0300
+gpt-4	                      $0.0300;	$0.0600
+gpt-4-32k	                  $0.0600;	$0.1200
+gpt-3.5-turbo-1106	        $0.0010;	$0.0020
+gpt-3.5-turbo-instruct	    $0.0015;	$0.0020
+*/
+</script>
+</body>
+</html>
