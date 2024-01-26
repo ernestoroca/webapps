@@ -7,10 +7,10 @@
 <body>
 <div class="w3-container">
   <div class="w3-card-4">
-    <div class="w3-container w3-green">
+    <div class="w3-container w3-green" id="config-click">
       <h2>Chat Config</h2>
     </div>
-    <form class="w3-container">
+    <form class="w3-container" id="config-show">
       <p>
         <label>Key</label>
         <input class="w3-input" type="text" id="llave">
@@ -36,16 +36,26 @@
       </p>
       <p>
         <button class="w3-button w3-white w3-border w3-border-red w3-round-large" id="preguntar">Enviar</button>
+        <span id="contador"></span>
       </p>
     </form>
   </div>
 </div>
-<div class="w3-container" id="respuestas">
-</div>  
+<div class="w3-container" id="respuestas"></div>  
 <script>
-let API_KEY = "";
-let custom = "";
-let resumen = "";
+let usage = {
+  completion_tokens: 0,
+  prompt_tokens: 0
+};
+  
+let API_KEY = localStorage.getItem("API_KEY");
+if(API_KEY){
+  document.getElementById("llave").value = "******";
+}
+let custom = localStorage.getItem("custom");
+if(custom){
+  document.getElementById("custom").value = custom;
+}
 
 function enviarGPT(losMensajes){
     return fetch('https://api.openai.com/v1/chat/completions', {
@@ -71,12 +81,18 @@ function enviarGPT(losMensajes){
         }
         return response.json();
     }).then(data => {
+        usage.completion_tokens += data.usage.completion_tokens;
+        usage.prompt_tokens += data.usage.prompt_tokens;
         return Promise.resolve(data.choices[0].message.content);
     });
 }
+function printContador(){
+    document.getElementById("contador").innerHTML = usage.prompt_tokens +"; "+ usage.completion_tokens;
+}  
 function resumir(nuevo){
     if(resumen === ""){
         resumen = nuevo;
+        printContador();
         return;
     }
     let losMensajes = [];
@@ -90,6 +106,7 @@ function resumir(nuevo){
     });
     enviarGPT(losMensajes).then(res => {
         resumen = res;
+        printContador();
     });
 }
 function enviar(texto){
@@ -113,6 +130,9 @@ document.getElementById("configurar").onclick = function(event){
   event.preventDefault();
   API_KEY = document.getElementById("llave").value;
   custom = document.getElementById("custom").value;
+
+  localStorage.setItem("API_KEY",API_KEY);
+  localStorage.setItem("custom",custom);
 };
 document.getElementById("preguntar").onclick = function(event){
   event.preventDefault();
@@ -125,6 +145,10 @@ document.getElementById("preguntar").onclick = function(event){
     respuestas.insertBefore(div,respuestas.firstChild);
     resumir(res);
   });
+};
+document.getElementById("config-click").onclick = function(){
+  let x = document.getElementById("config-show");
+  x.style.display = (x.style.display === "none") ? "block" : "none";
 };
 
 /*                          Input                   Outpu
