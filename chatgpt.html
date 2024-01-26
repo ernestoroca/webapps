@@ -40,14 +40,12 @@
     </form>
   </div>
 </div>
-<div class="w3-container">
-  <div class="w3-panel w3-pale-blue w3-leftbar w3-rightbar w3-border-blue" id="respuesta">
-  </div>
+<div class="w3-container" id="respuestas">
 </div>  
 <script>
-
 let API_KEY = "";
 let custom = "";
+let resumen = "";
 
 function enviarGPT(losMensajes){
     return fetch('https://api.openai.com/v1/chat/completions', {
@@ -74,7 +72,41 @@ function enviarGPT(losMensajes){
         return response.json();
     }).then(data => {
         return Promise.resolve(data.choices[0].message.content);
-    })
+    });
+}
+function resumir(nuevo){
+    if(resumen === ""){
+        resumen = nuevo;
+        return;
+    }
+    let losMensajes = [];
+    losMensajes.push({
+        "role":"system",
+        "content":custom
+    });
+     losMensajes.push({
+        "role":"user",
+        "content":"Haz el resumen del siguiente texto: \n"+resumen+"\n"+nuevo
+    });
+    enviarGPT(losMensajes).then(res => {
+        resumen = res;
+    });
+}
+function enviar(texto){
+    let losMensajes = [];
+    losMensajes.push({
+        "role":"system",
+        "content":custom
+    });
+    losMensajes.push({
+        "role":"user",
+        "content": "El resumen de la conversación es: \n"+ resumen
+    });
+    losMensajes.push({
+        "role":"user",
+        "content":texto
+    });
+    return enviarGPT(losMensajes);
 }
 
 document.getElementById("configurar").onclick = function(event){
@@ -85,21 +117,15 @@ document.getElementById("configurar").onclick = function(event){
 document.getElementById("preguntar").onclick = function(event){
   event.preventDefault();
   let pregunta = document.getElementById("pregunta").value;
-  let losMensajes = [];
-  losMensajes.push({
-    "role":"system",
-    "content":custom
-  });
-  losMensajes.push({
-    "role":"user",
-    "content":pregunta
-  });
-  return enviarGPT(losMensajes).then(res => {
-    document.getElementById('respuesta').innerHTML = res;
+  return enviar(pregunta).then(res => {
+    let div = document.createElement("div");
+    div.classList.add("w3-panel","w3-pale-blue","w3-leftbar","w3-rightbar","w3-border-blue");
+    div.innerHTML = res;
+    let respuestas = document.getElementById('respuestas');
+    respuestas.insertBefore(div,respuestas.firstChild);
+    resumir(res);
   });
 };
-
-
 
 /*                          Input                   Outpu
 gpt-4-1106-preview          $0.0100;	$0.0300
