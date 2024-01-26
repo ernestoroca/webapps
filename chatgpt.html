@@ -77,11 +77,13 @@ function enviarGPT(losMensajes){
     })
 }
 
-document.getElementById("configurar").onclick = function(){
+document.getElementById("configurar").onclick = function(event){
+  evt.preventDefault();
   API_KEY = document.getElementById("llave").value;
   custom = document.getElementById("custom").value;
 };
-document.getElementById("preguntar").onclick = function(){
+document.getElementById("preguntar").onclick = function(event){
+  evt.preventDefault();
   let pregunta = document.getElementById("pregunta").value;
   let losMensajes = [];
   losMensajes.push({
