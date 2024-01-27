@@ -382,3 +382,15 @@ var IndexedStorage = (function(){
         }
     };
 }());
+
+var Tools = (function(){
+    makeid: function(l){
+        let result = '';
+        let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        let lng = characters.length;
+        for (let i=0; i<l; i++) {
+            result += characters.charAt(Math.floor(Math.random() * lng));
+        }
+        return result;
+    }
+}());
