@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Web Apps</title>
   <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="/common.js"></script>
 </head>
 <body>
 <div class="w3-container">
@@ -18,7 +19,7 @@
       </p>
       <p>
         <label>Instrucción</label><br>
-        <textarea name="w3review" rows="4" cols="80" id="custom"></textarea>
+        <textarea class="w3-input w3-border w3-round" type="text" id="custom"></textarea>
       </p>
       <p>
         <button class="w3-button w3-white w3-border w3-border-red w3-round-large" id="configurar">Configurar</button>
@@ -33,7 +34,7 @@
     </div>
     <form class="w3-container">
       <p>
-        <textarea name="w3review" rows="4" cols="80" id="pregunta"></textarea>
+        <textarea class="w3-input w3-border w3-round" type="text" id="pregunta"></textarea>
       </p>
       <p>
         <button class="w3-button w3-white w3-border w3-border-red w3-round-large" id="preguntar">Enviar</button>
@@ -61,6 +62,11 @@ if(custom){
 }
 
 var enviando = false;
+
+window.onload = function(){
+  W3.textarea("custom");
+  W3.textarea("pregunta");
+};
 
 function enviarGPT(losMensajes){
     return fetch('https://api.openai.com/v1/chat/completions', {
