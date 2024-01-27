@@ -59,6 +59,8 @@ if(custom){
   document.getElementById("custom").value = custom;
 }
 
+var enviando = false;
+
 function enviarGPT(losMensajes){
     return fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
@@ -137,16 +139,22 @@ document.getElementById("configurar").onclick = function(event){
   localStorage.setItem("API_KEY",API_KEY);
   localStorage.setItem("custom",custom);
 };
+
 document.getElementById("preguntar").onclick = function(event){
+  if(enviando){
+    return;
+  }
+  enviando = true;
   event.preventDefault();
   let pregunta = document.getElementById("pregunta").value;
   return enviar(pregunta).then(res => {
+    enviando = false;
     let div = document.createElement("div");
     div.classList.add("w3-panel","w3-pale-blue","w3-leftbar","w3-rightbar","w3-border-blue");
     div.innerHTML = res;
     let respuestas = document.getElementById('respuestas');
     respuestas.insertBefore(div,respuestas.firstChild);
-    resumir(res);
+    resumir(pregunta+"\n"+res);
   });
 };
 document.getElementById("config-click").onclick = function(){
