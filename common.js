@@ -134,3 +134,251 @@ var W3 = (function(){
         }
     };
 }());
+
+var IndexedStorage = (function(){
+    let db;
+    const openRequest = indexedDB.open('IndexedStorage');
+    openRequest.onupgradeneeded = function(event) {
+        event.target.result.createObjectStore("KeyValue");
+    };
+    openRequest.onsuccess = function(event) {
+        db = event.target.result;
+    };
+    openRequest.onerror = function(event) {
+        console.error("Database error:" + event.target.errorCode);
+    };
+    return {
+        clear: function(){
+            return new Promise((resolve, reject) => {
+                let tx = db.transaction('KeyValue', 'readwrite');
+                let st = tx.objectStore('KeyValue');
+                
+                var gRequest = st.openCursor();
+                
+                gRequest.onsuccess = function() {
+                    let cursor = gRequest.result;
+                    if (!cursor) {
+                        resolve();
+                    } else {
+                        st.delete(cursor.key);
+                        cursor.continue();
+                    }
+                };
+                gRequest.onerror = function() {
+                    reject(gRequest.error);
+                };
+            });
+        },
+        setItem: function(key, value) {
+            return new Promise((resolve, reject) => {
+                let tx = db.transaction('KeyValue', 'readwrite');
+                let st = tx.objectStore('KeyValue');
+                let sRequest = st.put(value, key);
+                sRequest.onsuccess = function() {
+                    resolve(key);
+                };
+                sRequest.onerror = function() {
+                    reject(sRequest.error);
+                };
+            });
+        },
+        getItem: function(key) {
+            return new Promise((resolve, reject) => {
+                let tx = db.transaction('KeyValue', 'readonly');
+                let st = tx.objectStore('KeyValue');
+                let gRequest = st.get(key);
+                gRequest.onsuccess = function() {
+                    resolve(gRequest.result);
+                };
+                gRequest.onerror = function() {
+                    reject(gRequest.error);
+                };
+            });
+        },
+        removeItem: function(key) {
+            return new Promise((resolve, reject) => {
+                let tx = db.transaction('KeyValue', 'readwrite');
+                let st = tx.objectStore('KeyValue');
+                let rRequest = st.delete(key);
+                rRequest.onsuccess = function() {
+                    resolve();
+                };
+                rRequest.onerror = function() {
+                    reject(rRequest.error);
+                };
+            });
+        },
+        length: function(){
+            return new Promise((resolve, reject) => {
+                let tx = db.transaction('KeyValue', 'readonly');
+                let st = tx.objectStore('KeyValue');
+                let cRequest = st.count();
+                cRequest.onsuccess = function() {
+                    resolve(cRequest.result);
+                }
+                cRequest.onerror = function() {
+                    reject(cRequest.error);
+                };
+            });
+        },
+        key: function(n){
+            return new Promise((resolve, reject) => {
+                let tx = db.transaction('KeyValue', 'readonly');
+                let st = tx.objectStore('KeyValue');
+                let read = false;
+                let cRequest = st.openCursor();
+                
+                cRequest.onsuccess = function(e) {
+                    let cursor = cRequest.result;
+                    if (!cursor) {
+                        resolve(null);
+                    } else if(n === 0){
+                        resolve(cursor.key);
+                    } else if(read){
+                        resolve(cursor.key);
+                    } else {
+                        read = true;
+                        cursor.advance(n-1);
+                    }
+                };
+                cRequest.onerror = function() {
+                    reject(cRequest.error);
+                };
+            });
+        },
+        nextKey: function(key){
+            return new Promise((resolve, reject) => {
+                let tx = db.transaction('KeyValue', 'readonly');
+                let st = tx.objectStore('KeyValue');
+                
+                let range = IDBKeyRange.lowerBound(key, true);
+                var gRequest = st.openCursor(range);
+                
+                gRequest.onsuccess = function(e) {
+                    let cursor = gRequest.result;
+                    if (!cursor) {
+                        resolve(null);
+                    } else {
+                        resolve(cursor.key);
+                    }
+                };
+                gRequest.onerror = function() {
+                    reject(gRequest.error);
+                };
+            });
+        },
+        nextItem: function(key){
+            return new Promise((resolve, reject) => {
+                let tx = db.transaction('KeyValue', 'readonly');
+                let st = tx.objectStore('KeyValue');
+                
+                let range = IDBKeyRange.lowerBound(key, true);
+                var gRequest = st.openCursor(range);
+                
+                gRequest.onsuccess = function(e) {
+                    let cursor = gRequest.result;
+                    if (!cursor) {
+                        resolve(null);
+                    } else {
+                        resolve({
+                            key: cursor.key,
+                            item: cursor.value
+                        });
+                    }
+                };
+                gRequest.onerror = function() {
+                    reject(gRequest.error);
+                };
+            });
+        },
+        nextKeyList: function(key,n){
+            return new Promise((resolve, reject) => {
+                let keylist = [];
+                let tx = db.transaction('KeyValue', 'readonly');
+                let st = tx.objectStore('KeyValue');
+                
+                let range = IDBKeyRange.lowerBound(key, true);
+                var gRequest = st.openCursor(range);
+                
+                gRequest.onsuccess = function(e) {
+                    let cursor = gRequest.result;
+                    if (!cursor) {
+                        resolve(keylist);
+                    } else {
+                        keylist.push(cursor.key);
+                        if(keylist.length >= n){
+                            resolve(keylist);
+                        } else {
+                            cursor.continue();
+                        }
+                    }
+                };
+                gRequest.onerror = function() {
+                    reject(gRequest.error);
+                };
+            });
+        },
+        nextList: function(key,n){
+            return new Promise((resolve, reject) => {
+                let keylist = [];
+                let valuelist = [];
+                let tx = db.transaction('KeyValue', 'readonly');
+                let st = tx.objectStore('KeyValue');
+                
+                let range = IDBKeyRange.lowerBound(key, true);
+                var gRequest = st.openCursor(range);
+                
+                gRequest.onsuccess = function(e) {
+                    let cursor = gRequest.result;
+                    if (!cursor) {
+                        resolve({
+                            keys: keylist,
+                            values: valuelist
+                        });
+                    } else {
+                        keylist.push(cursor.key);
+                        valuelist.push(cursor.value);
+                        if(keylist.length >= n){
+                            resolve({
+                                keys: keylist,
+                                values: valuelist
+                            });
+                        } else {
+                            cursor.continue();
+                        }
+                    }
+                };
+                gRequest.onerror = function() {
+                    reject(gRequest.error);
+                };
+            });
+        },
+        jumpKey: function(key,n){
+            return new Promise((resolve, reject) => {
+                let tx = db.transaction('KeyValue', 'readonly');
+                let st = tx.objectStore('KeyValue');
+                let read = false;
+                
+                let range = IDBKeyRange.lowerBound(key, true);
+                let gRequest = st.openCursor(range);
+                
+                gRequest.onsuccess = function(e) {
+                    let cursor = gRequest.result;
+                    if (!cursor) {
+                        resolve(null);
+                    } else if(n === 0){
+                        resolve(cursor.key);
+                    } else if(read){
+                        resolve(cursor.key);
+                    } else {
+                        read = true;
+                        cursor.advance(n-1);
+                    }
+                };
+                gRequest.onerror = function() {
+                    reject(gRequest.error);
+                };
+            });
+        }
+    };
+}());
