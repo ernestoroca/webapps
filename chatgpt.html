@@ -158,10 +158,6 @@ function enviar(texto){
           "content":texto
        });
     }
-    losMensajes.push({
-        "role":"user",
-        "content":texto
-    });
     return enviarGPT(losMensajes);
 }
 
