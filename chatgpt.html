@@ -50,6 +50,10 @@ var usage = {
   prompt_tokens: 0
 };
 
+const modelogpt = 'gpt-4-1106-preview';
+const precioIn = 0.01;
+const precioOut = 0.03;
+
 var resumen = "";
   
 var API_KEY = localStorage.getItem("API_KEY");
@@ -76,7 +80,7 @@ function enviarGPT(losMensajes){
             'Authorization': `Bearer ${API_KEY}`,
         },
         body: JSON.stringify({
-            model: 'gpt-4-1106-preview',
+            model: modelogpt,
             messages: losMensajes,
             temperature: 0.5,
             top_p: 0.7,
@@ -98,7 +102,7 @@ function enviarGPT(losMensajes){
     });
 }
 function printContador(){
-    document.getElementById("contador").innerHTML = usage.prompt_tokens +"; "+ usage.completion_tokens;
+    document.getElementById("contador").innerHTML = (usage.prompt_tokens*precioIn) +"; "+ (usage.completion_tokens*precioOut);
 }  
 function resumir(nuevo){
     if(resumen === ""){
