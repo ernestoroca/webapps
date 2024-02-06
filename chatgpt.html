@@ -104,9 +104,9 @@ function enviarGPT(losMensajes){
 function printContador(){
     document.getElementById("contador").innerHTML = (usage.prompt_tokens*precioIn) +"; "+ (usage.completion_tokens*precioOut);
 }  
-function resumir(nuevo){
+function resumir(pregunta,respuesta){
     if(resumen === ""){
-        resumen = nuevo;
+        resumen = pregunta+"\n"+respuesta;
         printContador();
         return;
     }
@@ -115,9 +115,21 @@ function resumir(nuevo){
         "role":"system",
         "content":custom
     });
-     losMensajes.push({
+    losMensajes.push({
         "role":"user",
-        "content":"Haz el resumen del siguiente texto: \n"+resumen+"\n"+nuevo
+        "content": "Context:\n" + resumen
+    });
+    losMensajes.push({
+        "role":"user",
+        "content": "Command:\n" + pregunta
+    });
+    losMensajes.push({
+        "role":"user",
+        "content": "Answer:\n" + respuesta
+    });
+    losMensajes.push({
+        "role":"user",
+        "content":"Make a Summary using the Context, the Command and the Answer you just received."
     });
     enviarGPT(losMensajes).then(res => {
         resumen = res;
@@ -131,10 +143,21 @@ function enviar(texto){
         "role":"system",
         "content":custom
     });
-    losMensajes.push({
-        "role":"user",
-        "content": "El resumen de la conversación es: \n"+ resumen
-    });
+    if(resumen !== ""){
+       losMensajes.push({
+          "role":"user",
+          "content": "Summary: \n"+ resumen
+       }); 
+       losMensajes.push({
+          "role":"user",
+          "content": "Remember the Summary and answer this Command using the context of the conversation: \n"+ texto
+       });
+    } else {
+       losMensajes.push({
+          "role":"user",
+          "content":texto
+       });
+    }
     losMensajes.push({
         "role":"user",
         "content":texto
@@ -165,7 +188,7 @@ document.getElementById("preguntar").onclick = function(event){
     div.innerHTML = res;
     let respuestas = document.getElementById('respuestas');
     respuestas.insertBefore(div,respuestas.firstChild);
-    resumir(pregunta+"\n"+res);
+    resumir(pregunta,res);
   });
 };
 document.getElementById("config-click").onclick = function(){
