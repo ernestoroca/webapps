@@ -18,6 +18,15 @@
         <input class="w3-input" type="text" id="llave">
       </p>
       <p>
+       <label><b>First Name</b></label>
+       <select class="w3-select" id="modelo">
+         <option value="" disabled selected>Choose your option</option>
+         <option value="1">Option 1</option>
+         <option value="2">Option 2</option>
+         <option value="3">Option 3</option>
+        </select>
+      </p>
+      <p>
         <label>Instrucción</label><br>
         <textarea class="w3-input w3-border w3-round" type="text" id="custom"></textarea>
       </p>
@@ -49,30 +58,56 @@ var usage = {
   completion_tokens: 0,
   prompt_tokens: 0
 };
+var modelos = [{
+  nombre: "gpt-4o",
+  envio: 5,
+  recepcion: 15
+},{
+  nombre: "gpt-4-turbo",
+  envio: 10,
+  recepcion: 30
+},{
+  nombre: "gpt-4",
+  envio: 30,
+  recepcion: 60
+},{
+  nombre: "gpt-4-32k",
+  envio: 60,
+  recepcion: 120
+},{
+  nombre: "gpt-3.5-turbo-0125",
+  envio: 0.5,
+  recepcion: 1.5
+}];
+var losMensajes = [];
 
-const modelogpt = 'gpt-4-1106-preview';
-const precioIn = 0.01;
-const precioOut = 0.03;
+//llenar modelos para elegir
+var strHtml = "";
+for(let i=0;i<modelos.length;i++){
+    strHtml += `<option value="${modelos[i].nombre}">${modelos[i].nombre}</option>`;
+}
+document.getElementById("modelos").innerHTML = strHtml;
 
-var resumen = "";
-  
 var API_KEY = localStorage.getItem("API_KEY");
 if(API_KEY){
   document.getElementById("llave").value = "******";
 }
 var custom = localStorage.getItem("custom");
 if(custom){
-  document.getElementById("custom").value = custom;
+    document.getElementById("custom").value = custom;
+    losMensajes.push({
+        "role":"system",
+        "content":custom
+    });
 }
-
-var enviando = false;
 
 window.onload = function(){
   W3.textarea("custom");
-  W3.textarea("pregunta");
+  W3.textarea("pregunta");  
 };
 
 function enviarGPT(losMensajes){
+    let modelogpt = document.getElementById("modelos").value;
     return fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -102,95 +137,65 @@ function enviarGPT(losMensajes){
     });
 }
 function printContador(){
+    let valModelo = document.getElementById("modelos").value;
+    let precioIn,precioOut;
+    for(let i=0;i<modelos.length;i++){
+      if(modelos[i].nombre === valModelo){
+        precioIn = modelos[i].envio;
+        precioOut = modelos[i].recepcion;
+        break;
+      }
+    }
     document.getElementById("contador").innerHTML = (usage.prompt_tokens*precioIn) +"; "+ (usage.completion_tokens*precioOut);
 }  
-function resumir(pregunta,respuesta){
-    if(resumen === ""){
-        resumen = pregunta+"\n"+respuesta;
-        printContador();
-        return;
-    }
-    let losMensajes = [];
-    losMensajes.push({
-        "role":"system",
-        "content":custom
-    });
-    losMensajes.push({
-        "role":"user",
-        "content": "Context:\n" + resumen
-    });
-    losMensajes.push({
-        "role":"user",
-        "content": "Command:\n" + pregunta
-    });
-    losMensajes.push({
-        "role":"user",
-        "content": "Answer:\n" + respuesta
-    });
-    losMensajes.push({
-        "role":"user",
-        "content":"Make a Summary using the Context, the Command and the Answer you just received."
-    });
-    enviarGPT(losMensajes).then(res => {
-        resumen = res;
-        console.log(resumen);
-        printContador();
-    });
-}
-function enviar(texto){
-    let losMensajes = [];
-    losMensajes.push({
-        "role":"system",
-        "content":custom
-    });
-    if(resumen !== ""){
-       losMensajes.push({
-          "role":"user",
-          "content": "Summary: \n"+ resumen
-       }); 
-       losMensajes.push({
-          "role":"user",
-          "content": "Remember the Summary and answer this Command using the context of the conversation: \n"+ texto
-       });
-    } else {
-       losMensajes.push({
-          "role":"user",
-          "content":texto
-       });
-    }
-    return enviarGPT(losMensajes);
-}
 
 document.getElementById("configurar").onclick = function(event){
-  event.preventDefault();
-  API_KEY = document.getElementById("llave").value;
-  custom = document.getElementById("custom").value;
-
-  localStorage.setItem("API_KEY",API_KEY);
-  localStorage.setItem("custom",custom);
+    event.preventDefault();
+    API_KEY = document.getElementById("llave").value;
+    custom = document.getElementById("custom").value;
+    losMensajes = [];
+    losMensajes.push({
+        "role":"system",
+        "content":custom
+    });
+    localStorage.setItem("API_KEY",API_KEY);
+    localStorage.setItem("custom",custom);
 };
 
+let enviando = false;
 document.getElementById("preguntar").onclick = function(event){
-  if(enviando){
-    return;
-  }
-  enviando = true;
-  event.preventDefault();
-  let pregunta = document.getElementById("pregunta").value;
-  return enviar(pregunta).then(res => {
-    enviando = false;
-    let div = document.createElement("div");
-    div.classList.add("w3-panel","w3-pale-blue","w3-leftbar","w3-rightbar","w3-border-blue");
-    div.innerHTML = res;
-    let respuestas = document.getElementById('respuestas');
-    respuestas.insertBefore(div,respuestas.firstChild);
-    resumir(pregunta,res);
-  });
+    if(enviando){
+        return;
+    }
+    enviando = true;
+    event.preventDefault();
+    let pregunta = document.getElementById("pregunta").value;
+    losMensajes.push({
+        "role":"user",
+        "content":pregunta
+    });
+    return enviarGPT(losMensajes).then(respuesta => {
+        enviando = false;
+        let div = document.createElement("div");
+        div.classList.add("w3-panel","w3-pale-blue","w3-leftbar","w3-rightbar","w3-border-blue");
+        div.innerHTML = respuesta;
+        let lasRespuestas = document.getElementById('respuestas');
+        lasRespuestas.insertBefore(div,lasRespuestas.firstChild);
+        losMensajes.push({
+            "role":"assistant",
+            "content":respuesta
+        });
+        document.getElementById("pregunta").value = "";
+    }).catch(()=>{
+        enviando = false;
+    });
 };
 document.getElementById("config-click").onclick = function(){
   let x = document.getElementById("config-show");
   x.style.display = (x.style.display === "none") ? "block" : "none";
 };
+
+
 
 /*                          Input                   Outpu
 gpt-4-1106-preview          $0.0100;	$0.0300
