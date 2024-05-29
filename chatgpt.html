@@ -129,6 +129,7 @@ function enviarGPT(losMensajes){
     }).then(data => {
         usage.completion_tokens += data.usage.completion_tokens;
         usage.prompt_tokens += data.usage.prompt_tokens;
+        printContador();
         return Promise.resolve(data.choices[0].message.content);
     });
 }
@@ -142,7 +143,10 @@ function printContador(){
         break;
       }
     }
-    document.getElementById("contador").innerHTML = (usage.prompt_tokens*precioIn) +"; "+ (usage.completion_tokens*precioOut);
+    let pIn = usage.prompt_tokens*precioIn/1000000;
+    let pOut = usage.completion_tokens*precioOut/1000000;
+    document.getElementById("contador").innerHTML = 
+      pIn +"; "+ pOut +"; "+(pIn+pOut);
 }  
 
 document.getElementById("configurar").onclick = function(event){
@@ -191,7 +195,7 @@ document.getElementById("preguntar").onclick = function(event){
             "role":"assistant",
             "content":respuesta
         });
-        document.getElementById("pregunta").value = "";
+        document.getElementById("preguntar").value = "";
     }).catch(()=>{
         enviando = false;
     });
