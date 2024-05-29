@@ -147,15 +147,20 @@ function printContador(){
 
 document.getElementById("configurar").onclick = function(event){
     event.preventDefault();
-    API_KEY = document.getElementById("llave").value;
+    let strKey = document.getElementById("llave").value;
+    if(strKey !== "******"){
+        API_KEY = strKey;
+        localStorage.setItem("API_KEY",API_KEY);
+    }
+    
     custom = document.getElementById("custom").value;
+    localStorage.setItem("custom",custom);
+  
     losMensajes = [];
     losMensajes.push({
         "role":"system",
         "content":custom
     });
-    localStorage.setItem("API_KEY",API_KEY);
-    localStorage.setItem("custom",custom);
 };
 
 let enviando = false;
