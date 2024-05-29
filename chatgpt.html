@@ -85,7 +85,7 @@ for(let i=0;i<modelos.length;i++){
 document.getElementById("modelos").innerHTML = strHtml;
 
 var API_KEY = localStorage.getItem("API_KEY");
-if(API_KEY){
+if(API_KEY && API_KEY !== ""){
   document.getElementById("llave").value = "******";
 }
 var custom = localStorage.getItem("custom");
@@ -147,11 +147,6 @@ function printContador(){
 
 document.getElementById("configurar").onclick = function(event){
     event.preventDefault();
-    let strKey = document.getElementById("llave").value;
-    if(strKey !== "******"){
-        API_KEY = strKey;
-        localStorage.setItem("API_KEY",API_KEY);
-    }
     
     custom = document.getElementById("custom").value;
     localStorage.setItem("custom",custom);
@@ -161,6 +156,16 @@ document.getElementById("configurar").onclick = function(event){
         "role":"system",
         "content":custom
     });
+
+    let strKey = document.getElementById("llave").value;
+    if(strKey == ""){
+        API_KEY = strKey;
+        localStorage.setItem("API_KEY",API_KEY);
+    } else  if(strKey !== "******"){
+        API_KEY = strKey;
+        localStorage.setItem("API_KEY",API_KEY);
+        document.getElementById("llave").value = "******";
+    }
 };
 
 let enviando = false;
