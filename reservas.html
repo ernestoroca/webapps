@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Viaggio Reservas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+      crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+      crossorigin="anonymous"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+      rel="stylesheet">
+    <script src="common.js"></script>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">
+          <img src="viaggio.jpeg" alt="Logo" width="120" height="24" class="d-inline-block align-text-top">
+        </a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNavAltMarkup"
+          aria-controls="navbarNavAltMarkup"
+          aria-expanded="false"
+          aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+          <div class="navbar-nav" id="navbar-nav">
+            <a class="nav-link" href="">Reservas</a>
+            <a class="nav-link" id="logout">Salir</a>
+          </div>
+        </div>
+      </div>
+    </nav>
+    <div class="container">
+      <div class="row">
+        <div class="col col-sm-2 text-center">
+          <button type="button" class="btn" id="retro">
+            <i class="fa fa-chevron-left fa-2x"></i>
+          </button>
+        </div>
+        <div class="col col-sm-8 text-center">
+          <h1>Reservas</h1>
+        </div>
+        <div class="col col-sm-2 text-center">
+          <button type="button" class="btn" id="avanza">
+            <i class="fa fa-chevron-right fa-2x"></i>
+          </button>
+        </div>
+      </div>
+      <div class="row">
+        <div style="overflow-x: auto;white-space: nowrap;">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th scope="col" class="bg-secondary text-white"></th>
+                <th scope="col" class="bg-secondary text-white" id="fecha-1">lun</th>
+                <th scope="col" class="bg-secondary text-white" id="fecha-2">mar</th>
+                <th scope="col" class="bg-secondary text-white" id="fecha-3">mie</th>
+                <th scope="col" class="bg-secondary text-white" id="fecha-4">jue</th>
+                <th scope="col" class="bg-secondary text-white" id="fecha-5">vie</th>
+                <th scope="col" class="bg-secondary text-white" id="fecha-6">sab</th>
+              </tr>
+            </thead>
+            <tbody id="tabla-horarios">
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div
+        class="modal fade"
+        id="elModal-libre"
+        tabindex="-1"
+        aria-labelledby="elModalLibreLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="elModalLibreLabel">Nueva reserva</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="body-libre">
+              <p>
+                <b>Fecha: </b> <span id="fecha-libre"></span>
+              </p>
+              <p>
+                <b>Hora: </b> <span id="hora-libre"></span>:00
+              </p>
+              <div class="mb-3">
+                <label for="vin-libre" class="form-label"><b>VIN</b></label>
+                <input type="text" class="form-control" id="vin-libre" placeholder="Ingrese el VIN">
+              </div>
+              <div id="datos-libre"></div>
+              <div class="mb-3">
+                <label for="cliente-libre" class="form-label"><b>Cliente</b></label>
+                <input type="text" class="form-control" id="cliente-libre" placeholder="Cliente">
+              </div>
+              <div class="mb-3">
+                <label for="nota-libre" class="form-label"><b>Nota</b></label>
+                <input type="text" class="form-control" id="nota-libre" placeholder="Nota">
+              </div>
+              <div class="mb-3">
+                <label for="arhivo" class="form-label"><b>Comprobante</b></label>
+                <input class="form-control" type="file" id="comprobante">
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="" id="pagado">
+                <label class="form-check-label" for="pagado">
+                    <b>Confirmo que el automóvil está 100% pagado</b>
+                </label>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-success" id="buscar">Buscar</button>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+              <button type="button" class="btn btn-danger" id="aceptar">Aceptar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="modal fade"
+        id="elModal-ocupado"
+        tabindex="-1"
+        aria-labelledby="elModalOcupadoLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="elModalOcupadoLabel">Reserva</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="body-ocupado"></div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-danger" id="borrar">Borrar</button>
+              <button type="button" class="btn btn-danger" id="entregado">Entregado</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="modal fade"
+        id="elModal-hora"
+        tabindex="-1"
+        aria-labelledby="elModalHoraLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="elModalHoraLabel">Reservas</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <div class="list-group" id="body-hora"></div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-primary" id="bloquear">Bloquear</button>
+              <button type="button" class="btn btn-primary" id="reservar">Reservar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+var domingo;
+var lunvie = ['dom','lun','mar','mie','jue','vie','sab'];
+var semana = ['','','','','','',''];
+var miUsuarioId = localStorage.getItem("miUsuarioId");
+var miUsuarioTipo = localStorage.getItem("miUsuarioTipo");
+var elDia,laHora,myModal,loBloqueos,vecReservas;
+var horizontal = (window.innerWidth > window.innerHeight);
+
+//miUsuarioTipo = "admin"; //BORRAR
+const MAX_FILE = 1000000;
+const MAX_TIEMPO = 24*60*60*1000;
+const MAX_X_DIA = 8;
+const MAX_X_HORA = 2;
+const MAX_HORAS = 12;
+
+function imprimirHorario(){
+    let hini = 8;
+    let str = "";
+    for(let i=0;i<MAX_HORAS;i++){
+        let hx = 8+i;
+        str += `<tr id="hora-${hx}">
+                <td class="bg-secondary text-white">${hx}:00</td>
+                <td id="lun-${hx}" class="text-white border"></td>
+                <td id="mar-${hx}" class="text-white border"></td>
+                <td id="mie-${hx}" class="text-white border"></td>
+                <td id="jue-${hx}" class="text-white border"></td>
+                <td id="vie-${hx}" class="text-white border"></td>
+                <td id="sab-${hx}" class="text-white border"></td>
+              </tr>`;
+    }
+    document.getElementById("tabla-horarios").innerHTML = str;
+}
+
+function colorear(elem,color){
+    elem.classList.remove("bg-danger");
+    elem.classList.remove("bg-warning");
+    elem.classList.remove("bg-secondary");
+    elem.classList.remove("bg-success");
+    switch(color){
+        case "rojo":
+            elem.classList.add("bg-danger");
+            break;
+        case "amarillo":
+            elem.classList.add("bg-warning");
+            break;
+        case "verde":
+            elem.classList.add("bg-success");
+            break;
+        case "gris":
+            elem.classList.add("bg-secondary");
+            break;
+    }
+}
+
+function getDiaHora(item){
+    let diaN = semana.indexOf(fechaSinCero(item.fecha));
+    if(diaN < 0){
+        return "";
+    }
+    return lunvie[diaN]+"-"+item.hora;
+}
+
+function limpiarTabla(){
+    for(let d=1;d<7;d++){
+        for(let h=0;h<MAX_HORAS;h++){
+            let etiqueta = lunvie[d]+"-"+(8+h);
+            let elem = document.getElementById(etiqueta);
+            elem.innerHTML = (horizontal)?"Libre":"lib";
+            colorear(elem,"verde")
+            elem.setAttribute("data-contador","0");
+            elem.setAttribute("data-bloqueo","FALSE");
+        }
+    }
+}
+
+function getImportacion(id){
+    let str = localStorage.getItem("importacion-"+id);
+    if(str){
+        let obj = JSON.parse(str);
+        return Promise.resolve(obj);
+    }
+    let cmd = "cmd=importacion_una";
+    cmd += "&id="+id;
+    return loadGet(cmd).then((res) => {
+        localStorage.setItem("importacion-"+id,JSON.stringify(res));
+        return Promise.resolve(res);
+    });
+}
+
+function getUnaReserva(id){
+    let str = localStorage.getItem("reserva-"+id);
+    if(str){
+        let obj = JSON.parse(str);
+        return Promise.resolve(obj);
+    }
+    let cmd = "cmd=reserva_una";
+    cmd += "&id="+id;
+    return loadGet(cmd).then((res) => {
+        localStorage.setItem("reserva-"+id,JSON.stringify(res));
+        return Promise.resolve(res);
+    });
+}
+
+function getUnVehiculo(vin){
+    let str = localStorage.getItem("vehiculo-"+vin);
+    if(str){
+        let obj = JSON.parse(str);
+        return Promise.resolve(obj);
+    }
+    let cmd = "cmd=item_uno";
+    cmd += "&vin="+vin;
+    return loadGet(cmd).then((res) => {
+        localStorage.setItem("vehiculo-"+vin,JSON.stringify(res));
+        return Promise.resolve(res);
+    });
+}
+
+function printUnUsuario(datos){
+    document.getElementById("usuario-"+datos.id).innerHTML = `
+    <img
+      src="/fotos/${datos.id}"
+      class="card-img-top"
+      alt="..."
+      onerror="this.onerror=null;this.src='/fotos/0';"
+    >
+    <div class="card-body">
+      <p class="card-text">
+        ${datos.nombres} ${datos.apellidos}
+      </p>
+    </div>
+    `;
+}
+
+function getUnUsuario(id){
+    let cmd = "cmd=usuario_uno";
+    cmd += "&id="+id;
+    return loadGet(cmd);
+}
+
+function getFechas(){
+    const unDia = 24*60*60*1000;
+    let elDia = new Date(domingo);
+    semana[0] = ""+ elDia.getFullYear() +"-"+ (elDia.getMonth()+1) +"-"+ elDia.getDate();
+    for(let i=1;i<7;i++){
+        elDia = new Date(domingo + unDia*i);
+        let anho = elDia.getFullYear();
+        let mes = elDia.getMonth()+1;
+        let dia = elDia.getDate();
+        semana[i] = anho +"-"+ mes +"-"+ dia;
+        let laFecha = ""+dia+"/"+mes;
+        if(horizontal){
+            laFecha += "/"+anho;
+        }
+        document.getElementById("fecha-"+i).innerHTML = `
+          <p>
+            ${lunvie[i]}<br>
+            ${laFecha}
+          </p>
+        `;
+    }
+}
+
+function pintarBloqueos(){
+    let vector = losBloqueos.split(";");
+    let len = vector.length-1;
+    for(let i=0;i<len;i++){
+        let unBloqueo = vector[i].split(":");
+        let fech = unBloqueo[0];
+        let hor = unBloqueo[1];
+        let posDia = semana.indexOf(fech);
+        if(posDia>=1){
+            let etiqueta = lunvie[posDia]+"-"+hor;
+            let elem = document.getElementById(etiqueta);
+            elem.innerHTML = (horizontal)?"Bloqueado":"blq";
+            colorear(elem,"gris");
+            elem.setAttribute("data-bloqueo","TRUE");
+        }
+    }
+}
+
+function getBloqueos(){
+    let cmd = "cmd=bloqueo_lista";
+    return loadGet(cmd).then(res => {
+        losBloqueos = res;
+        pintarBloqueos();
+        return Promise.resolve();
+    });
+}
+
+function checkReserva(vin){
+    let cmd = "cmd=reserva_vin";
+    cmd += "&vin="+vin;
+    return loadGet(cmd);
+}
+
+function actualContador(diahora){
+    if(diahora === ""){
+        return;
+    }
+    let elem = document.getElementById(diahora);
+    let contstr = elem.getAttribute("data-contador");
+    let cont = parseInt(contstr);
+    cont++;
+    elem.setAttribute("data-contador",cont);
+    elem.innerHTML = (horizontal)?cont+" Reservas":cont+" res";
+    
+    let bloqueo = elem.getAttribute("data-bloqueo");
+    
+    if(bloqueo === "TRUE"){
+        return;
+    }
+    if(cont >= MAX_X_HORA){
+        colorear(elem,"rojo");
+    } else {
+        colorear(elem,"amarillo");
+    }
+}
+
+async function getReservas() {
+    vecReservas = [];
+    let cmd = "cmd=reserva_lista";
+    cmd += "&fecha="+semana[0];
+    let reservas = await loadGet(cmd);
+    let len = reservas.length;
+    for(let i=0;i<len;i++){
+        let datos = await getUnaReserva(reservas[i]);
+        datos.diahora = getDiaHora(datos);
+        actualContador(datos.diahora);
+        vecReservas.push(datos);
+    }
+    return;
+}
+
+function repintar(){
+    limpiarTabla();
+    getFechas();
+    getBloqueos().then(() => {
+        return getReservas();
+    }).catch((error) => {
+        Alerta.set(error);
+    });
+}
+
+function pintarFormulario(){
+    let posdia = lunvie.indexOf(elDia);
+    let fecha = sql2amd(semana[posdia]);
+    document.getElementById("fecha-libre").innerHTML = elDia +" "+ fecha;
+    document.getElementById("hora-libre").innerHTML = laHora;
+    document.getElementById("datos-libre").innerHTML = "";
+    document.getElementById("vin-libre").value = "";
+    document.getElementById("nota-libre").value = "";
+    document.getElementById("cliente-libre").value = "";
+    document.getElementById("pagado").checked = false;
+}
+
+function pintarUnaReserva(laReserva){ //REVISAR
+    document.getElementById("body-ocupado").innerHTML = "<p>Buscando datos</p>";
+    let elVendedor,fila;
+    
+    getUnUsuario(laReserva.vendedor).then(res => {
+        elVendedor = res;
+        return getUnVehiculo(laReserva.vin);
+    }).then(res => {
+        fila = res.fila.replace("\r","");
+        return getImportacion(res.importacion);
+    }).then(res => {
+        let cabeza = res.cabeza.replace("\r","");
+        let strHtml = `<p><b>Fecha: </b>${laReserva.fecha}</p>`;
+        strHtml += `<p><b>Hora: </b>${laReserva.hora}:00</p>`;
+        strHtml += `<p><b>Ejecutivo de Ventas: </b>${decodeURIComponent(elVendedor.nombres)} ${decodeURIComponent(elVendedor.apellidos)}</p>`;
+        let vecCab = JSON.parse(cabeza);
+        let vecFil = JSON.parse(fila);
+        let len = vecCab.length;
+        for(let i=0;i<len;i++){
+            strHtml += `<p><b>${vecCab[i]}: </b>${vecFil[i]}</p>`;
+        }
+        strHtml += `<p><b>Cliente: </b>${laReserva.cliente}</p>`;
+        strHtml += `<p><b>Nota: </b>${laReserva.nota}</p>`;
+        if(laReserva.comprobante && laReserva.comprobante !== ""){
+            strHtml += `<p><a href="/archivos/${laReserva.comprobante}" download><b>Comprobante</b></a></p>`;
+        }
+        if(laReserva.entrega && laReserva.entrega !== ""){
+            strHtml += `<p><b>Entregado: </b>${laReserva.entrega}</p>`;
+        }
+        strHtml +=  `<p><b>Reserva Id: </b><span id="reservaid">${laReserva.id}</span></p>`;
+        document.getElementById("body-ocupado").innerHTML = strHtml;
+        if(myModal){
+            myModal.hide();
+        }
+        myModal = new bootstrap.Modal(document.getElementById('elModal-ocupado'));
+        myModal.show();
+    }).catch((error) => {
+        if(error === "SESION"){
+            window.location.href = "index.html";
+        }
+        Alerta.set(error);
+    });
+}
+
+function pintarListaReservas(label){
+    let strHtml = "";
+    let len = vecReservas.length;
+    for(let i=0;i<len;i++){
+        let unaReserva = vecReservas[i];
+        if(unaReserva.diahora !== label){
+            continue;
+        }
+        let id = "reserva-";
+        if (miUsuarioTipo === "admin" || miUsuarioTipo === "controlador" || unaReserva.vendedor === miUsuarioId){
+            id += unaReserva.id;
+            if(unaReserva.entrega === ""){
+                strHtml += `<button type="button" class="list-group-item list-group-item-action" id="${id}">${unaReserva.vin}</button>`;
+            } else {
+                strHtml += `<button type="button" class="list-group-item list-group-item-action active" id="${id}">${unaReserva.vin}</button>`;
+            }
+        } else {
+            strHtml += `<button type="button" class="list-group-item list-group-item-action" id="${id}">Reservado</button>`;
+        }
+    }
+    document.getElementById("body-hora").innerHTML = strHtml;
+}
+
+function clickTabla(evento){
+    let target = evento.target;
+    while(target.id === ""){
+        target = target.parentNode;
+    }
+    let id = target.id;
+    if(id.includes("hora-")){
+        return;
+    }
+    let vec = id.split("-");
+    elDia = vec[0];
+    laHora = vec[1];
+    pintarListaReservas(id);
+    
+    if(myModal){
+        myModal.hide();
+    }
+    myModal = new bootstrap.Modal(document.getElementById('elModal-hora'));
+    myModal.show();
+}
+
+function setReserva(vin,nota,cliente,comprobante){
+    let posdia = lunvie.indexOf(elDia);
+    let fecha = semana[posdia];
+    
+    let cmd = "cmd=reserva_nueva";
+    cmd += "&fecha="+fecha;
+    cmd += "&hora="+laHora;
+    cmd += "&vin="+vin;
+    cmd += "&cliente="+encodeURIComponent(cliente);
+    cmd += "&nota="+encodeURIComponent(nota);
+    cmd += "&comprobante="+encodeURIComponent(comprobante);
+    return loadPost(cmd);
+}
+
+function iniciar(){
+    if(!miUsuarioTipo){
+        window.location.href = "index.html";
+        return;
+    }
+    imprimirHorario();
+    if(miUsuarioTipo === "admin"){
+        document.getElementById("navbar-nav").innerHTML = `
+            <a class="nav-link" href="reservas.html">Reservas</a>
+            <a class="nav-link" href="importaciones.html">Importaciones</a>
+            <a class="nav-link" href="usuarios.html">Usuarios</a>
+            <a class="nav-link" href="reportes.html">Reportes</a>
+            <a class="nav-link" id="logout">Salir</a>
+        `;
+    } else {
+        document.getElementById("bloquear").style.display = "none";
+    }
+    document.getElementById("logout").onclick = function(){
+        logout().then(() => {
+            window.location.href = "index.html";
+        });
+    };
+    limpiarTabla();
+    let hoy = new Date();
+    domingo = hoy.getTime();
+    let dia = hoy.getDay();
+    domingo -= dia*24*60*60*1000;
+    getFechas();
+    for(let h=0;h<MAX_HORAS;h++){
+        document.getElementById("hora-"+(8+h)).onclick = clickTabla;
+    }
+    getBloqueos().then(() => {
+        return getReservas();
+    }).catch((error) => {
+        if(error === "SESION"){
+            window.location.href = "index.html";
+        }
+        Alerta.set(error);
+    });
+}
+
+document.getElementById("retro").onclick = function(){
+    domingo -= 7*24*60*60*1000;
+    repintar();
+};
+
+document.getElementById("avanza").onclick = function(){
+    domingo += 7*24*60*60*1000;
+    repintar();
+};
+
+document.getElementById("body-hora").onclick = function(evento){//?? se dispara cuando no debe
+    let target = evento.target;
+    while(target.id === ""){
+        target = target.parentNode;
+    }
+    let id = target.id;
+    if(id.includes("body-hora")){
+        return;
+    }
+    id = id.replace("reserva-","");
+    if(id === ""){
+        return;
+    }
+    if(myModal){
+        myModal.hide();
+        myModal = null;
+    }
+    localStorage.removeItem("reserva-"+id);
+    getUnaReserva(id).then(pintarUnaReserva);
+};
+
+document.getElementById("reservar").onclick = function(){
+    //verificar si hay una distancia de 24 horas
+    let fechastr = semana[lunvie.indexOf(elDia)];
+    let vecFecha = fechastr.split("-");
+    let fechaReserva = new Date(parseInt(vecFecha[0]), parseInt(vecFecha[1])-1, parseInt(vecFecha[2]), parseInt(laHora), 0, 0, 0);
+
+    if(fechaReserva.getTime() < Date.now() + MAX_TIEMPO){
+        Alerta.set("Solicitud fuera de término. Intente en otro día");
+        return;
+    }
+    
+    let diahora = elDia+"-"+laHora;
+    let elem = document.getElementById(diahora);
+    let bloqueo = elem.getAttribute("data-bloqueo");
+    if(bloqueo === "TRUE"){
+        Alerta.set("No se permiten reservas");
+        return;
+    }
+    
+    let contstr = elem.getAttribute("data-contador");
+    let cont = parseInt(contstr);
+    if(cont >= MAX_X_HORA && miUsuarioTipo !== "admin" ){
+        return;
+    }
+    pintarFormulario();
+    if(myModal){
+        myModal.hide();
+    }
+    myModal = new bootstrap.Modal(document.getElementById('elModal-libre'));
+    myModal.show();
+};
+
+document.getElementById("bloquear").onclick = function(){
+    let fechahora = semana[lunvie.indexOf(elDia)]+":"+laHora; //aaaa-mm-dd:hh
+    let cmd;
+    if(losBloqueos.includes(fechahora)){
+        cmd = "cmd=bloqueo_clr";
+    } else {
+        cmd = "cmd=bloqueo_set";
+    }
+    cmd += "&fechahora="+fechahora;
+    return loadGet(cmd).then((res) => {
+        myModal.hide();
+        losBloqueos = res;
+        repintar();
+    });
+};
+
+document.getElementById("buscar").onclick = function(){
+    let vin = document.getElementById("vin-libre").value.trim();
+    if(vin === ""){
+        Alerta.set("Agregue el VIN");
+        return;
+    }
+    let fila;
+    Alerta.set("Buscando datos del vehículo");
+    document.getElementById("datos-libre").innerHTML = "";
+    getUnVehiculo(vin).then(res => {
+        fila = res.fila;
+        return getImportacion(res.importacion);
+    }).then(res => {
+        let strHtml = "";
+        let str = res.cabeza.replace("\r","");
+        let vecCab = JSON.parse(str);
+        fila = fila.replace("\r","");
+        let vecFil = JSON.parse(fila);
+        let len = vecCab.length;
+        for(let i=0;i<len;i++){
+            if(vecCab[i].toUpperCase() === "VIN"){
+                continue;
+            }
+            strHtml += `<p><b>${vecCab[i]}: </b>${vecFil[i]}</p>`;
+        }
+        document.getElementById("datos-libre").innerHTML = strHtml;
+    }).catch((error) => {
+        if(error === "SESION"){
+            window.location.href = "index.html";
+        }
+        Alerta.set(error);
+    });
+};
+
+let reservando = false;
+document.getElementById("aceptar").onclick = function(){
+    if(reservando){
+        return;
+    }
+    let vin = document.getElementById("vin-libre").value.trim();
+    if(vin === ""){
+        Alerta.set("Agregue el VIN");
+        return;
+    }
+    let cliente = document.getElementById("cliente-libre").value.trim();
+    if(cliente === ""){
+        Alerta.set("Agregue el Cliente");
+        return;
+    }
+    if(document.getElementById("datos-libre").innerHTML === ""){
+        Alerta.set("Confirme los datos del VIN antes de hacer la reserva");
+        return;
+    }
+    
+    if(!document.getElementById("pagado").checked){
+        Alerta.set("Confirme que el automóvil está 100% pagado");
+        return;
+    }
+    
+    let file = null;
+    let fileElem = document.getElementById("comprobante");
+    let fileVec = fileElem.files;
+    if (fileVec.length > 0){
+        file = fileVec[0];
+        if(file.size > MAX_FILE){
+            Alerta.set("Archivo muy grande");
+            return;
+        }
+    }
+    
+    let nota = document.getElementById("nota-libre").value.trim();
+    
+    reservando = true;
+    Alerta.set("Validando reserva");
+    getReservas().then(() => {//tOdO
+        return repintar();
+    }).then(() => {
+        let diahora = elDia+"-"+laHora;
+        let elem = document.getElementById(diahora);
+        let contstr = elem.getAttribute("data-contador");
+        let cont = parseInt(contstr);
+        if(cont >= MAX_X_HORA && miUsuarioTipo !== "admin" ){
+            Alerta.set("Ya no se pueden solicitar más reservas este día. Intente en otro día");
+            return;
+        }
+        return checkReserva(vin);
+    }).then(res => {
+        if(res.id !== "Null"){
+            return Promise.reject(Error("Ese vehículo ya está reservado"));
+        }
+        if(file){
+            return filePost(file);
+        }
+        return Promise.resolve();
+    }).then(res => {
+        let enlace = (file && res)?res:"";
+        return setReserva(vin,nota,cliente,enlace);
+    }).then(res => {
+        let posdia = lunvie.indexOf(elDia);
+        let fecha = semana[posdia];
+        let item = {
+            fecha: fecha,
+            hora: laHora,
+            vendedor: miUsuarioId,
+            id: res
+        };
+        myModal.hide();
+        reservando = false;
+        repintar();
+    }).catch(error => {
+        reservando = false;
+        Alerta.set(error);
+    });
+};
+
+let borrando = false;
+document.getElementById("borrar").onclick = function(){
+    if(borrando){
+        return;
+    }
+    if(miUsuarioTipo !== "admin"){
+        Alerta.set("No está autorizado a borrar las reservas");
+        return;
+    }
+    let elem = document.getElementById("reservaid");
+    if(!elem){
+        Alerta.set("No existe la reserva");
+        return;
+    }
+    
+    borrando = true;
+    Alerta.set("Borrando reserva");
+    let cmd = "cmd=reserva_borrar";
+    cmd += "&id="+elem.innerHTML;
+    loadGet(cmd).then(res => {
+        Alerta.set("Reserva borrada");
+        myModal.hide();
+        borrando = false;
+        repintar();
+    }).catch(error => {
+        borrando = false;
+        Alerta.set(error);
+        if(error === "SESION"){
+            window.location.href = "index.html";
+            return;
+        }
+        repintar();
+    });
+};
+
+let entregando = false;
+document.getElementById("entregado").onclick = function(){
+    if(entregando){
+        return;
+    }
+    
+    /*
+    if(miUsuarioTipo !== "controlador"){
+        Alerta.set("No está autorizado");
+        return;
+    }
+    */
+    
+    let elem = document.getElementById("reservaid");
+    if(!elem){
+        Alerta.set("No existe la reserva");
+        return;
+    }
+    
+    entregando = true;
+    Alerta.set("Entregando");
+    let cmd = "cmd=reserva_entregar";
+    cmd += "&id="+elem.innerHTML;
+    loadGet(cmd).then(res => {
+        Alerta.set("Reserva entregada");
+        myModal.hide();
+        entregando = false;
+        repintar();
+    }).catch(error => {
+        entregando = false;
+        Alerta.set(error);
+        if(error === "SESION"){
+            window.location.href = "index.html";
+            return;
+        }
+        repintar();
+    });
+};
+
+iniciar();
+
+    </script>
+  </body>
+</html>
