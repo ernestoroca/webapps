@@ -44,7 +44,7 @@ function loadGet(params) {
                 myReject(obj.msg);
             }
         };
-        xhttp.open("GET", "backend.php?"+params, true);
+        xhttp.open("GET", "https://viaggiobooking.com/backend.php?"+params, true);
         xhttp.send();
     });
 }
@@ -66,7 +66,7 @@ function loadPost(params) {
                 myReject(obj.msg);
             }
         };
-        xhttp.open("POST", "backend.php");
+        xhttp.open("POST", "https://viaggiobooking.com/backend.php");
         xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
         xhttp.send(params);
     });
