@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Web Apps</title>
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <script src="llmlab.js"></script>
+</head>
+<body>
+<div class="w3-container">
+  <button id="llms-button" class="w3-btn w3-block w3-black w3-left-align">Llms</button>
+  <div id="llms" class="w3-container w3-hide">
+    <div id="llms-list" class="w3-row"></div>
+  </div>
+  
+  <button id="agents-button" class="w3-btn w3-block w3-black w3-left-align">Agents</button>
+  <div id="agents" class="w3-container w3-hide">
+    <div id="agents-list" class="w3-row"></div>
+  </div>
+  
+  <button id="tasks-button" class="w3-btn w3-block w3-black w3-left-align">Tasks</button>
+  <div id="tasks" class="w3-container w3-hide">
+    <div id="tasks-list" class="w3-row"></div>
+  </div>
+</div>
+<script>
+
+let modales = null;
+
+function printLlms(){
+    let lista = Llms.list();
+    let len = lista.length;
+    let strHtml = "";
+    for(let i=0;i<len;i++){
+        let elLlm = lista[i];
+        let laLlave = Llms.getKey(elLlm);
+        let color = (laLlave)?"red":"green";
+        let texto = (laLlave)?"Borrar":"Agregar";
+        strHtml += `
+<div class="w3-col s6 m4">
+  <div class="w3-panel w3-card">
+    <p>${elLlm}</p>
+    <button id="llm-${elLlm}" class="w3-button w3-${color}">${texto}</button>
+  </div>
+</div>
+        `;
+    }
+    document.getElementById("llms-list").innerHTML = strHtml;
+}
+
+function pedirClave(llm){
+    if(modales){
+        modales.remove();
+    }
+    modales = document.createElement("div");
+    modales.classList.add("w3-modal");
+    modales.id = "modal";
+    modales.innerHTML = `
+<div class="w3-modal-content">
+  <div class="w3-container">
+    <form class="w3-container">
+      <input class="w3-hide" type="text" id="modal-llm" value="${llm}">
+      <p>
+        <label>Clave</label>
+        <input class="w3-input" type="text" id="modal-clave">
+      </p>
+      <p>
+        <button id="modal-guardar" class="w3-btn w3-green">Guardar</button>
+        <button id="modal-cancelar" class="w3-btn w3-blue">Cancelar</button>
+      </p>
+    </form>
+  </div>
+</div>
+    `;
+    document.body.appendChild(modales);
+    modales.style.display='block';
+    modales.onclick = function(evento){
+        evento.preventDefault();
+        let target = evento.target;
+        while(target.id === ""){
+            target = target.parentNode;
+        }
+        switch(target.id){
+            case "modal":
+                break;
+            case "modal-cancelar":
+                modales.remove();
+                modales = null;
+                break;
+            case "modal-guardar":
+                let clave = document.getElementById("modal-clave").value;
+                let llm = document.getElementById("modal-llm").value;
+                if(clave !== ""){
+                    Llms.setKey(llm,clave);
+                    modales.remove();
+                    modales = null;
+                    printLlms();
+                }
+                break;
+        }
+    }
+}
+
+document.getElementById("llms-list").onclick = function(evento){
+    let target = evento.target;
+    while(target.id === ""){
+        target = target.parentNode;
+    }
+    if(target.id === "llms-list"){
+        return;
+    }
+    let elLlm = target.id.replace("llm-","");
+    let laLlave = Llms.getKey(elLlm);
+    if(laLlave){
+        //ToDo: preguntar si algún agente usa ese llm
+        Llms.delKey(elLlm);
+        printLlms();
+    } else {
+        pedirClave(elLlm);
+    }
+}
+
+//-----------
+
+function llmsOptions(){
+    let lista = Llms.list();
+    let len = lista.length;
+    let options = "";
+    for(let i=0;i<len;i++){
+        options += `<option value="${lista[i]}">${lista[i]}</option>`;
+    }
+    return options;
+}
+
+function modelOptions(){
+    let llm = document.getElementById("modal-llm").value;
+    let lista = Llms.getModels(llm);
+    let len = lista.length;
+    let options = "";
+    for(let i=0;i<len;i++){
+        options += `<option value="${lista[i].name}">${lista[i].name}</option>`;
+    }
+    document.getElementById("modal-model").innerHTML = options;
+}
+
+function printUnAgente(agenteid){
+    let losDatos = Agents.read(agenteid);
+    document.getElementById("modal-role").value = losDatos.role;
+    document.getElementById("modal-goal").value = losDatos.goal;
+    document.getElementById("modal-backstory").value = losDatos.backstory;
+    document.getElementById("modal-llm").value = losDatos.llm;
+    document.getElementById("modal-model").value = losDatos.model;
+}
+
+function formAgente(agenteid){
+    if(modales){
+        modales.remove();
+    }
+    
+    modales = document.createElement("div");
+    modales.classList.add("w3-modal");
+    modales.id = "modal";
+    modales.innerHTML = `
+<div class="w3-modal-content">
+  <div class="w3-container">
+    <form class="w3-container">
+      <input class="w3-hide" type="text" id="modal-agente" value="${agenteid}">
+      <p>
+        <label>Role</label>
+        <input class="w3-input" type="text" id="modal-role">
+      </p>
+      <p>
+        <label>Goal</label>
+        <textarea class="w3-input w3-border" style="resize:none" id="modal-goal"></textarea>
+      </p>
+      <p>
+        <label>Backstory</label>
+        <textarea class="w3-input w3-border" style="resize:none" id="modal-backstory"></textarea>
+      </p>
+      <p>
+        <label>Llm</label>
+        <select class="w3-select" id="modal-llm">
+          ${llmsOptions()}
+        </select>
+      </p>
+      <p>
+        <label>Model</label>
+        <select class="w3-select" id="modal-model"></select>
+      </p>
+      <p>
+        <button id="modal-guardar" class="w3-btn w3-green">Guardar</button>
+        <button id="modal-cancelar" class="w3-btn w3-blue">Cancelar</button>
+      </p>
+    </form>
+  </div>
+</div>
+    `;
+    document.body.appendChild(modales);
+    modales.style.display='block';
+    modales.onclick = function(evento){
+        evento.preventDefault();
+        let target = evento.target;
+        while(target.id === ""){
+            target = target.parentNode;
+        }
+        switch(target.id){
+            case "modal":
+                break;
+            case "modal-cancelar":
+                modales.remove();
+                modales = null;
+                break;
+            case "modal-guardar":
+                let agente = document.getElementById("modal-agente").value;
+                let role = document.getElementById("modal-role").value;
+                let goal = document.getElementById("modal-goal").value;
+                let backstory = document.getElementById("modal-backstory").value;
+                let llm = document.getElementById("modal-llm").value;
+                let model = document.getElementById("modal-model").value;
+                if(role === "" || goal === "" || backstory === ""){
+                    return;
+                }
+                if(agente === "new"){
+                    Agents.create(role,goal,backstory,llm,model);
+                } else {
+                    Agents.update(agente,role,goal,backstory,llm,model);
+                }
+                modales.remove();
+                modales = null;
+                printLosAgentes();
+                break;
+        }
+    };
+    document.getElementById("modal-llm").onchange = modelOptions;
+    modelOptions();
+    
+    if(agenteid !== "new"){
+        printUnAgente(agenteid)
+    }
+}
+
+function printLosAgentes(){
+    let lista = Agents.list();
+    let len = lista.length;
+    let strHtml = "";
+    for(let i=0;i<len;i++){
+        let elAgente = Agents.read(lista[i]);
+        strHtml += `
+<div class="w3-col s12 m6">
+  <div class="w3-panel w3-card">
+    <p>${elAgente.role}</p>
+    <button id="agent-edit-${lista[i]}" class="w3-button w3-green">Editar</button>
+    <button id="agent-delete-${lista[i]}" class="w3-button w3-red">Borrar</button>
+  </div>
+</div>
+        `;
+    }
+    strHtml += `
+<div class="w3-col s12 m6">
+  <div class="w3-panel w3-card">
+    <p>Nuevo</p>
+    <button id="agent-edit-new" class="w3-button w3-green">Crear</button>
+  </div>
+</div>
+        `;
+    document.getElementById("agents-list").innerHTML = strHtml;
+}
+
+document.getElementById("agents-list").onclick = function(evento){
+    let target = evento.target;
+    while(target.id === ""){
+        target = target.parentNode;
+    }
+    if(target.id === "agents-list"){
+        return;
+    }
+    let agenteId;
+    if(target.id.includes("agent-edit-")){
+        agenteId = target.id.replace("agent-edit-","");
+        formAgente(agenteId);
+    } else if(target.id.includes("agent-delete-")){
+        agenteId = target.id.replace("agent-delete-","");
+        Agents.delete(agenteId);
+        printLosAgentes();
+    }
+}
+
+//-----------
+
+function agentsOptions(){
+    let lista = Agents.list();
+    let len = lista.length;
+    let options = "";
+    for(let i=0;i<len;i++){
+        let unAgente = Agents.read(lista[i]);
+        options += `<option value="${lista[i]}">${unAgente.role}</option>`;
+    }
+    return options;
+}
+
+function formTask(taskId){
+    if(modales){
+        modales.remove();
+    }
+    
+    modales = document.createElement("div");
+    modales.classList.add("w3-modal");
+    modales.id = "modal";
+    modales.innerHTML = `
+<div class="w3-modal-content">
+  <div class="w3-container">
+    <form class="w3-container">
+      <input class="w3-hide" type="text" id="modal-task" value="${taskId}">
+      <p>
+        <label>Title</label>
+        <input class="w3-input" type="text" id="modal-title">
+      </p>
+      <p>
+        <label>Description</label>
+        <textarea class="w3-input w3-border" style="resize:none" id="modal-description"></textarea>
+      </p>
+      <p>
+        <label>Expected Output</label>
+        <textarea class="w3-input w3-border" style="resize:none" id="modal-expectedOutput"></textarea>
+      </p>
+      <p>
+        <label>Context</label>
+        <textarea class="w3-input w3-border" style="resize:none" id="modal-context"></textarea>
+      </p>
+      <p>
+        <label>Llm</label>
+        <select class="w3-select" id="modal-agent">
+          ${agentsOptions()}
+        </select>
+      </p>
+      <p>
+        <button id="modal-guardar" class="w3-btn w3-green">Guardar</button>
+        <button id="modal-cancelar" class="w3-btn w3-blue">Cancelar</button>
+      </p>
+    </form>
+  </div>
+</div>
+    `;
+    document.body.appendChild(modales);
+    modales.style.display='block';
+    modales.onclick = function(evento){
+        evento.preventDefault();
+        let target = evento.target;
+        while(target.id === ""){
+            target = target.parentNode;
+        }
+        switch(target.id){
+            case "modal":
+                break;
+            case "modal-cancelar":
+                modales.remove();
+                modales = null;
+                break;
+            case "modal-guardar":
+                let task = document.getElementById("modal-task").value;
+                let title = document.getElementById("modal-title").value;
+                let description = document.getElementById("modal-description").value;
+                let agent = document.getElementById("modal-agent").value;
+                let expectedOutput = document.getElementById("modal-expectedOutput").value;
+                let context = document.getElementById("modal-context").value;
+                
+                if(title === "" || description === "" || expectedOutput === "" || context === ""){
+                    return;
+                }
+                if(task === "new"){
+                    Tasks.create(title,description,agent,expectedOutput,context);
+                } else {
+                    Tasks.update(task,title,description,agent,expectedOutput,context);
+                }
+                modales.remove();
+                modales = null;
+                printTasks();
+                break;
+        }
+    };
+    agentsOptions();
+    
+    if(taskId !== "new"){
+        printUnaTask(taskId)
+    }
+}
+
+function printUnaTask(taskId){
+    let losDatos = Tasks.read(taskId);
+    document.getElementById("modal-title").value = losDatos.title;
+    document.getElementById("modal-description").value = losDatos.description;
+    document.getElementById("modal-agent").value = losDatos.agent;
+    document.getElementById("modal-expectedOutput").value = losDatos.expectedOutput;
+    document.getElementById("modal-context").value = losDatos.context;
+}
+
+function printTasks(){
+    let lista = Tasks.list();
+    let len = lista.length;
+    let strHtml = "";
+    for(let i=0;i<len;i++){
+        let laTarea = Tasks.read(lista[i]);
+        strHtml += `
+<div class="w3-col s12 m6">
+  <div class="w3-panel w3-card">
+    <p>${laTarea.title}</p>
+    <button id="task-edit-${lista[i]}" class="w3-button w3-green">Editar</button>
+    <button id="task-delete-${lista[i]}" class="w3-button w3-red">Borrar</button>
+  </div>
+</div>
+        `;
+    }
+    strHtml += `
+<div class="w3-col s12 m6">
+  <div class="w3-panel w3-card">
+    <p>Nueva</p>
+    <button id="task-edit-new" class="w3-button w3-green">Crear</button>
+  </div>
+</div>
+        `;
+    document.getElementById("tasks-list").innerHTML = strHtml;
+}
+
+document.getElementById("tasks-list").onclick = function(evento){
+    let target = evento.target;
+    while(target.id === ""){
+        target = target.parentNode;
+    }
+    if(target.id === "tasks-list"){
+        return;
+    }
+    let taskId;
+    if(target.id.includes("task-edit-")){
+        taskId = target.id.replace("task-edit-","");
+        formTask(taskId);
+    } else if(target.id.includes("task-delete-")){
+        taskId = target.id.replace("task-delete-","");
+        Tasks.delete(taskId);
+        printTasks();
+    }
+}
+
+//-----------
+
+function showHide(evento){
+    let target = evento.target;
+    while(target.id === ""){
+        target = target.parentNode;
+    }
+    let label = target.id;
+    label = label.replace("-button","");
+    var x = document.getElementById(label);
+    if (x.className.indexOf("w3-show") == -1) {
+        x.className += " w3-show";
+    } else {
+        x.className = x.className.replace(" w3-show", "");
+    }
+}
+
+document.getElementById('llms-button').onclick = showHide;
+document.getElementById('agents-button').onclick = showHide;
+document.getElementById('tasks-button').onclick = showHide;
+
+window.onload = function(){
+    printLlms();
+    printLosAgentes();
+    printTasks();
+};
+
+</script>
+</body>
+</html>
