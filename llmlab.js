@@ -1,140 +1,92 @@
 var Llms = (function(){
-    let vecLlms = [];
-    vecLlms.push({
-        name: "chatgpt",
-        models: [{
-          name: "gpt-4o",
-          envio: 5,
-          recepcion: 15
-        },{
-          name: "gpt-4-turbo",
-          envio: 10,
-          recepcion: 30
-        },{
-          name: "gpt-4",
-          envio: 30,
-          recepcion: 60
-        },{
-          name: "gpt-4-32k",
-          envio: 60,
-          recepcion: 120
-        },{
-          name: "gpt-3.5-turbo-0125",
-          envio: 0.5,
-          recepcion: 1.5
-        }]
-    });
-    vecLlms.push({
-        name: "gemini",
-        models: [{
-          name: "gem-4o",
-          envio: 5,
-          recepcion: 15
-        },{
-          name: "gem-4-turbo",
-          envio: 10,
-          recepcion: 30
-        },{
-          name: "gem-4",
-          envio: 30,
-          recepcion: 60
-        },{
-          name: "gem-4-32k",
-          envio: 60,
-          recepcion: 120
-        },{
-          name: "gem-3.5-turbo-0125",
-          envio: 0.5,
-          recepcion: 1.5
-        }]
-    });
-    vecLlms.push({
-        name: "claude",
-        models: [{
-          name: "cla-4o",
-          envio: 5,
-          recepcion: 15
-        },{
-          name: "cla-4-turbo",
-          envio: 10,
-          recepcion: 30
-        },{
-          name: "cla-4",
-          envio: 30,
-          recepcion: 60
-        },{
-          name: "cla-4-32k",
-          envio: 60,
-          recepcion: 120
-        },{
-          name: "cla-3.5-turbo-0125",
-          envio: 0.5,
-          recepcion: 1.5
-        }]
-    });
-    
-    function postChatgpt(model,messages){
-        let api_key = localStorage.getItem("Llm-chatgpt");
-        if(!api_key){
-            return Promise.reject(Error("No tiene clave"));
+    let datos = null;
+    function sendMessage(llm,model,messages){
+        let key = localStorage.getItem("Llm-OpenRouter");
+        if(!key){
+            return Promise.reject(Error("Ingrese la clave"));
         }
-        return fetch('https://api.openai.com/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer '+api_key,
-            },
-            body: JSON.stringify({
-                model: model,
-                messages: messages,
-                temperature: 0.5,
-                top_p: 0.7,
-                n: 1,
-                stream: false,
-                presence_penalty: 0,
-                frequency_penalty: 0,
-            }),
-        }).then(response => {
-            if (!response.ok) {
-                console.log(response);
-                return Promise.reject(Error("No se pudo responder"));
+        return fetch("https://openrouter.ai/api/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${key}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            "model": llm+"/"+model,
+            "messages": messages,
+          }),
+        }).then((response) => {
+            if(!response.ok){
+                return Promise.reject(Error(esponse.status));
             }
             return response.json();
-        }).then(data => {
-            let res = {
-                completion_tokens: data.usage.completion_tokens,
-                prompt_tokens: data.usage.prompt_tokens,
-                content: data.choices[0].message.content
-            };
-            return Promise.resolve(res);
+        }).then((json) => {
+            return Promise.resolve(json);
         });
     }
     return {
-        setKey: function(llm,key){
-            localStorage.setItem("Llm-"+llm,key);
+        init: function(){
+            fetch("https://openrouter.ai/api/v1/models", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json"
+              },
+            }).then((response) => {
+                if(!response.ok){
+                    return Promise.reject(Error(response.status));
+                }
+                return response.json();
+            }).then((json) => {
+                datos = json.data;
+            });
         },
-        delKey: function(llm){
-            localStorage.removeItem("Llm-"+llm);
-        },
-        getKey: function(llm){
-            return localStorage.getItem("Llm-"+llm);
-        },
-        list: function(){
-            let len = vecLlms.length;
+        getLlms: function(){
+            let len = datos.length;
             let res = [];
             for(let i=0;i<len;i++){
-                res.push(vecLlms[i].name);
+                let item = datos[i];
+                let id = item.id;
+                let vec = id.split("/");
+                let base = vec[0];
+                if(res.indexOf(base)<0){
+                    res.push(base);
+                }
             }
             return res;
         },
         getModels: function(llm){
-            let len = vecLlms.length;
+            let len = datos.length;
+            let res = [];
             for(let i=0;i<len;i++){
-                if(vecLlms[i].name === llm){
-                    return vecLlms[i].models;
+                let item = datos[i];
+                let id = item.id;
+                let vec = id.split("/");
+                let base = vec[0];
+                if(base === llm){
+                    res.push(vec[1]);
                 }
             }
-            return [];
+            return res;
+        },
+        setKey: function(key){
+            localStorage.setItem("Llm-OpenRouter",key);
+        },
+        getData: function(llm,model){
+            let len = datos.length;
+            let res = [];
+            for(let i=0;i<len;i++){
+                let item = datos[i];
+                if(item.id === llm+"/"+model){
+                    return item;
+                }
+            }
+            return null;
+        },
+        delKey: function(llm){
+            localStorage.removeItem("Llm-OpenRouter");
+        },
+        getKey: function(){
+            localStorage.getItem("Llm-OpenRouter");
         }
     };
 }());
@@ -185,7 +137,7 @@ var Agents = (function(){
                 }
             }
             return res;
-        }
+        },
     };
 }());
 
@@ -235,6 +187,95 @@ var Tasks = (function(){
                 }
             }
             return res;
+        }
+    };
+}());
+
+var Process = (function(){
+    let agentMsg = [];
+    function initAgent(agentId){
+        let len = agentMsg.length;
+        for(let i=0;i<len;i++){
+            if(agentMsg[i].agent === agentId){
+                return;
+            }
+        }
+        agentMsg.push({
+            agent: agentId,
+            messages: []
+        });
+        agentMsg.messages.push({
+            "role":"system",
+            "content":
+            `Your role is: ${unAgente.role}.
+            Your goal is: ${unAgente.goal}.
+            Your backstory is: ${unAgente.backstory}`
+        });
+    }
+    function pushMsg(agentId,msg){
+        let len = agentMsg.length;
+        for(let i=0;i<len;i++){
+            if(agentMsg[i].agent === agentId){
+                agentMsg[i].messages.push(msg);
+                return;
+            }
+        }
+    }
+    function getMsgs(agentId){
+        let len = agentMsg.length;
+        for(let i=0;i<len;i++){
+            if(agentMsg[i].agent === agentId){
+                return agentMsg[i].messages;
+            }
+        }
+    }
+    async function runSerial(){
+        let len = taskList.length;
+        for(let i=0;i<len;i++){
+            let unaTarea = Tasks.read(taskList[i]);
+            let elAgente = Agents.read(unaTarea.agent);
+            initAgent(unaTarea.agent);
+            
+        }
+        let vecRespuesta = [];
+        for(let i=0;i<len;i++){
+            let unaTarea = Tasks.read(taskList[i]);
+            pushMsg(unaTarea.agent,{
+                "role":"user",
+                "content":
+                `Your task is: ${unaTarea.description}.
+                Your expected output is: ${unaTarea.expectedOutput}.
+                Use the following context for completing the task: ${unaTarea.context}.`
+            });
+            let mensajes = getMsgs(unaTarea.agent);
+            let elAgente = Agents.read(unaTarea.agent);
+            respuesta = await Llms.sendMessage(elAgente.llm,elAgente.model,mensajes);
+            pushMsg(unaTarea.agent,{
+                "role":"assistant",
+                "content":respuesta
+            });
+            vecRespuesta.push({
+                agente: elAgente.role,
+                respuesta: respuesta
+            });
+        }
+        return vecRespuesta;
+    }
+    let taskList = [];
+    return {
+        clear: function(){
+            taskList = [];
+        },
+        pushTask: function(taskid){
+            taskList.push();
+        },
+        run: function(mode){
+            agentMsg = [];
+            switch(mode){
+                case "serial":
+                    return runSerial();
+            }
+            
         }
     };
 }());
