@@ -1,29 +1,14 @@
+function makeid(length) {
+    let result = '';
+    let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    for (let i=0; i<length; i++) {
+        result += characters.charAt(Math.floor(Math.random() * 62));
+    }
+    return result;
+}
+
 var Llms = (function(){
     let datos = null;
-    function sendMessage(llm,model,messages){
-        let key = localStorage.getItem("Llm-OpenRouter");
-        if(!key){
-            return Promise.reject(Error("Ingrese la clave"));
-        }
-        return fetch("https://openrouter.ai/api/v1/chat/completions", {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${key}`,
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            "model": llm+"/"+model,
-            "messages": messages,
-          }),
-        }).then((response) => {
-            if(!response.ok){
-                return Promise.reject(Error(esponse.status));
-            }
-            return response.json();
-        }).then((json) => {
-            return Promise.resolve(json);
-        });
-    }
     return {
         init: function(){
             fetch("https://openrouter.ai/api/v1/models", {
@@ -87,6 +72,28 @@ var Llms = (function(){
         },
         getKey: function(){
             localStorage.getItem("Llm-OpenRouter");
+        },
+        sendMsg: function(llm,model,messages){
+            let key = localStorage.getItem("Llm-OpenRouter");
+            if(!key){
+                return Promise.reject(Error("Ingrese la clave"));
+            }
+            return fetch("https://openrouter.ai/api/v1/chat/completions", {
+              method: "POST",
+              headers: {
+                "Authorization": `Bearer ${key}`,
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({
+                "model": llm+"/"+model,
+                "messages": messages,
+              }),
+            }).then((response) => {
+                if(!response.ok){
+                    return Promise.reject(Error(esponse.status));
+                }
+                return response.json();
+            });
         }
     };
 }());
@@ -102,7 +109,12 @@ var Agents = (function(){
                 model:model
             };
             let str = JSON.stringify(obj);
-            localStorage.setItem("Agent-"+Date.now(),str);
+            let id,x;
+            do {
+                id = makeid(16);
+                x = localStorage.getItem("Agent-"+id);
+            } while(x);
+            localStorage.setItem("Agent-"+id,str);
         },
         read: function(id){
             let str = localStorage.getItem("Agent-"+id);
@@ -152,7 +164,12 @@ var Tasks = (function(){
                 context:context
             };
             let str = JSON.stringify(obj);
-            localStorage.setItem("Task-"+Date.now(),str);
+            let id,x;
+            do {
+                id = makeid(16);
+                x = localStorage.getItem("Task-"+id);
+            } while(x);
+            localStorage.setItem("Task-"+id,str);
         },
         read: function(id){
             let str = localStorage.getItem("Task-"+id);
@@ -192,90 +209,164 @@ var Tasks = (function(){
 }());
 
 var Process = (function(){
-    let agentMsg = [];
-    function initAgent(agentId){
-        let len = agentMsg.length;
+    let vecResponses = [];
+    function read(id){
+        let str = localStorage.getItem("Process-"+id);
+        if(!str){
+            return null;
+        }
+        let obj = JSON.parse(str);
+        obj.response = "";
+        let len = vecResponses.length;
         for(let i=0;i<len;i++){
-            if(agentMsg[i].agent === agentId){
-                return;
+            if(vecResponses[i].id === id){
+                obj.response = vecResponses.msg;
+                break;
             }
         }
-        agentMsg.push({
-            agent: agentId,
-            messages: []
-        });
-        agentMsg.messages.push({
+        return obj;
+    }
+    function crearMensajes(laTarea,elAgente,vecPre){
+        let vecMsg = [];
+        vecMsg.push({
             "role":"system",
             "content":
-            `Your role is: ${unAgente.role}.
-            Your goal is: ${unAgente.goal}.
-            Your backstory is: ${unAgente.backstory}`
+            `Your role is: ${elAgente.role}.
+            Your goal is: ${elAgente.goal}.
+            Your backstory is: ${elAgente.backstory}`
         });
-    }
-    function pushMsg(agentId,msg){
-        let len = agentMsg.length;
+        vecMsg(unaTarea.agent,{
+            "role":"user",
+            "content":
+            `Your task is: ${laTarea.description}.
+            Your expected output is: ${laTarea.expectedOutput}.
+            Use the following context for completing the task: ${laTarea.context}.`
+        });
+        let len = vecPre.length;
         for(let i=0;i<len;i++){
-            if(agentMsg[i].agent === agentId){
-                agentMsg[i].messages.push(msg);
-                return;
-            }
-        }
-    }
-    function getMsgs(agentId){
-        let len = agentMsg.length;
-        for(let i=0;i<len;i++){
-            if(agentMsg[i].agent === agentId){
-                return agentMsg[i].messages;
-            }
-        }
-    }
-    async function runSerial(){
-        let len = taskList.length;
-        for(let i=0;i<len;i++){
-            let unaTarea = Tasks.read(taskList[i]);
-            let elAgente = Agents.read(unaTarea.agent);
-            initAgent(unaTarea.agent);
-            
-        }
-        let vecRespuesta = [];
-        for(let i=0;i<len;i++){
-            let unaTarea = Tasks.read(taskList[i]);
-            pushMsg(unaTarea.agent,{
-                "role":"user",
-                "content":
-                `Your task is: ${unaTarea.description}.
-                Your expected output is: ${unaTarea.expectedOutput}.
-                Use the following context for completing the task: ${unaTarea.context}.`
-            });
-            let mensajes = getMsgs(unaTarea.agent);
-            let elAgente = Agents.read(unaTarea.agent);
-            respuesta = await Llms.sendMessage(elAgente.llm,elAgente.model,mensajes);
-            pushMsg(unaTarea.agent,{
+            let unaPre = vecPre[i];
+            vecMsg(unaTarea.agent,{
                 "role":"assistant",
-                "content":respuesta
-            });
-            vecRespuesta.push({
-                agente: elAgente.role,
-                respuesta: respuesta
+                "content":
+                `The following text was elaborated by this agent: ${unaPre.agent} with this goal: ${unaPre.task}.
+                ${unaPre.response}.`
+            }); 
+        }
+        return vecMsg;
+    }
+    async function evaluar(pos){
+        let elStep = read(vecResponses[pos].id);
+        if(elStep.response !== ""){
+            return true;
+        }
+        let len = elStep.preSteps.length;
+        let vecPre = [];
+        for(let i=0;i<len;i++){
+            let unStep = read(elStep.preSteps[i]);
+            if(unStep.response === ""){
+                return false;
+            }
+            let unaTarea = Tasks.read(unStep.taskid);
+            let unAgente = Agents.read(unaTarea.agent);
+            vecPre.push({
+                agent: unAgente.role,
+                task: unaTarea.description,
+                response: unStep.response
             });
         }
-        return vecRespuesta;
+        let laTarea = Tasks.read(elStep.taskid);
+        let elAgente = Agents.read(laTarea.agent);
+        let vecMsg = crearMensajes(laTarea,elAgente,vecPre);
+        
+        let res = await Llms.sendMsg(elAgente.llm,elAgente.model,vecMsg);
+        vecResponses[pos].msg = res;
+        
+        return true;
     }
-    let taskList = [];
+    
     return {
-        clear: function(){
-            taskList = [];
-        },
-        pushTask: function(taskid){
-            taskList.push();
-        },
-        run: function(mode){
-            agentMsg = [];
-            switch(mode){
-                case "serial":
-                    return runSerial();
-            }
+        create: function(label,taskid,preSteps){
+            let obj = {
+                label: label,
+                taskid: taskid,
+                preSteps: preSteps
+            };
+            let str = JSON.stringify(obj);
+            let id,x;
+            do {
+                id = makeid(16);
+                x = localStorage.getItem("Process-"+id);
+            } while(x);
+            localStorage.setItem("Process-"+id,str);
+            vecResponses.push({
+                id: id,
+                msg: ""
+            });
             
+        },
+        read: read,
+        update: function(id,label,taskid,preSteps){
+            let obj = {
+                label: label,
+                taskid: taskid,
+                preSteps: preSteps
+            };
+            let str = JSON.stringify(obj);
+            localStorage.setItem("Process-"+id,str);
+        },
+        delete: function(id){
+            localStorage.removeItem("Process-"+id);
+            
+            let len = vecResponses.length;
+            for(let i=0;i<len;i++){
+                if(vecResponses[i].id === id){
+                    vecResponses.splice(i,1);
+                    return;
+                }
+            }
+        },
+        list: function(){
+            let len = localStorage.length;
+            let res = [];
+            for(let i=0;i<len;i++){
+                let key = localStorage.key(i);
+                if(key.includes("Process-")){
+                    key = key.replace("Process-","");
+                    res.push(key);
+                }
+            }
+            return res;
+        },
+        init: function(){
+            vecResponses = [];
+            let len = localStorage.length;
+            for(let i=0;i<len;i++){
+                let key = localStorage.key(i);
+                if(key.includes("Process-")){
+                    key = key.replace("Process-","");
+                    vecResponses.push({
+                        id: key,
+                        msg: ""
+                    });
+                }
+            }
+        },
+        run: async function(){
+            let len = vecResponses.length;
+            for(let i=0;i<len;i++){
+                vecResponse[i].msg = "";
+            }
+            let n;
+            do{
+                n = 0;
+                for(let i=0;i<len;i++){
+                    let res = await evaluar(i);
+                    if(res) {
+                        n++;
+                    }
+                }
+                
+            } while(n<len);
         }
     };
 }());
