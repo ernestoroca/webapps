@@ -425,17 +425,24 @@ document.getElementById("tasks-list").onclick = function(evento){
 //-----------
 
 function printProcess(){
-    let lista = Tasks.list();
+    let lista = Process.list();
     let len = lista.length;
     let strHtml = "";
     for(let i=0;i<len;i++){
-        let laTarea = Tasks.read(lista[i]);
+        let elStep = Process.read(lista[i]);
+        let len = elStep.preSteps.length;
+        let strPre = "";
+        for(let j=0;j<len;j++){
+            let unStep = Process.read(elStep.preSteps[j]);
+            strPre += "["+ unStep.label +"] ";
+        }
         strHtml += `
 <div class="w3-col s12 m6">
   <div class="w3-panel w3-card">
-    <p>${laTarea.title}</p>
-    <button id="task-edit-${lista[i]}" class="w3-button w3-green">Editar</button>
-    <button id="task-delete-${lista[i]}" class="w3-button w3-red">Borrar</button>
+    <p><b>${elStep.label}<b></p>
+    <p>${strPre}</p>
+    <button id="process-edit-${lista[i]}" class="w3-button w3-green">Editar</button>
+    <button id="process-delete-${lista[i]}" class="w3-button w3-red">Borrar</button>
   </div>
 </div>
         `;
@@ -444,12 +451,186 @@ function printProcess(){
 <div class="w3-col s12 m6">
   <div class="w3-panel w3-card">
     <p>Nueva</p>
-    <button id="task-edit-new" class="w3-button w3-green">Crear</button>
+    <button id="process-edit-new" class="w3-button w3-green">Crear</button>
+  </div>
+</div>
+<div class="w3-col s12 m6">
+  <div class="w3-panel w3-card">
+    <p>RUN</p>
+    <button id="process-run" class="w3-button w3-red">Run</button>
   </div>
 </div>
         `;
-    document.getElementById("tasks-list").innerHTML = strHtml;
+    document.getElementById("process-list").innerHTML = strHtml;
 }
+
+function taskOptions(){
+    let lista = Tasks.list();
+    let len = lista.length;
+    let options = "";
+    for(let i=0;i<len;i++){
+        let unaTarea = Tasks.read(lista[i]);
+        options += `<option value="${lista[i]}">${unaTarea.title}</option>`;
+    }
+    document.getElementById("modal-task").innerHTML = options;
+}
+
+function processOptions(){
+    let lista = Process.list();
+    let len = lista.length;
+    let options = `<option value="">add</option>`;
+    for(let i=0;i<len;i++){
+        let unPaso = Process.read(lista[i]);
+        options += `<option value="${lista[i]}">${unPaso.label}</option>`;
+    }
+    document.getElementById("modal-previous-select").innerHTML = options;
+}
+
+function setNewStep(){
+    let stepId = document.getElementById("modal-previous-select").val;
+    if(stepId === ""){
+        return;
+    }
+    let elPaso = Process.read(processId);
+    let boton = document.createElement("button");
+    boton.id = "modal-previous-del-"+stepId;
+    boton.classList.add("w3-btn","w3-red");
+    boton.innerHTML = elPaso.label;
+    document.getElementById("modal-previous-list").appendChild(boton);
+    document.getElementById("modal-previous-select").val = "";
+}
+
+function printUnStep(){
+    let processId = document.getElementById("modal-process").value;
+    let elPaso = Process.read(processId);
+    document.getElementById("modal-label").innerHTML = elPaso.label;
+    document.getElementById("modal-task").value = elPaso.taskid;
+    let previos = "";
+    let len = elPaso.preSteps.length;
+    for(let i=0;i<len;i++){
+        let unPaso = Process.read(elPaso.preSteps[i]);
+        previos += `<button id="modal-previous-del-${elPaso.preSteps[i]}" class="w3-btn w3-red">${unPaso.label}</button>`;
+    }
+    document.getElementById("modal-previous-list").innerHTML = previos;
+}
+
+function updateProcess(vecPre){
+    let processId = document.getElementById("modal-process").value;
+    Process.create(label,taskid,vecPre);
+}
+
+function formProcess(processId){
+    if(modales){
+        modales.remove();
+    }
+    
+    modales = document.createElement("div");
+    modales.classList.add("w3-modal");
+    modales.id = "modal";
+    {modales.innerHTML = `
+<div class="w3-modal-content">
+  <div class="w3-container">
+    <form class="w3-container">
+      <input class="w3-hide" type="text" id="modal-process" value="${processId}">
+      <p>
+        <label>Label</label>
+        <input class="w3-input" type="text" id="modal-label">
+      </p>
+      <p>
+        <label>Task</label>
+        <select class="w3-select" id="modal-task">
+          ${taskOptions()}
+        </select>
+      </p>
+      <p>
+        <label>Previus Steps</label>
+        <select class="w3-select" id="modal-previous-select">
+          ${processOptions()}
+        </select>
+      </p>
+      <p id="modal-previous-list">
+      </p>
+      <p>
+        <button id="modal-guardar" class="w3-btn w3-green">Guardar</button>
+        <button id="modal-cancelar" class="w3-btn w3-blue">Cancelar</button>
+      </p>
+    </form>
+  </div>
+</div>
+    `;}
+    document.body.appendChild(modales);
+    modales.style.display='block';
+    modales.onclick = function(evento){
+        evento.preventDefault();
+        let target = evento.target;
+        while(target.id === ""){
+            target = target.parentNode;
+        }
+        switch(target.id){
+            case "modal":
+                return;
+            case "modal-cancelar":
+                modales.remove();
+                modales = null;
+                return;
+            case "modal-guardar":
+                let children = document.getElementById("modal-previous-list").children;
+                let len = children.length;
+                let vecPre = [];
+                for (let i=0;i<len;i++) {
+                    let preId = children[i].id.replace("modal-previous-del-","");
+                    vecPre.push(preId);
+                }
+                let label = document.getElementById("modal-label").value;
+                if(label === ""){
+                    return;
+                }
+                let taskid = document.getElementById("modal-task").value;
+                if(processId === "new"){
+                    Process.create(label,taskid,vecPre);
+                } else {
+                    Process.update(processId,label,taskid,vecPre);
+                }
+                modales.remove();
+                modales = null;
+                printProcess();
+                return;
+        }
+        if(target.id.includes("modal-previous-del-")){
+            document.getElementById(target.id).remove();
+        }
+    };
+    processOptions();
+    document.getElementById("modal-previous-select").onchange = setNewStep;
+    if(processId !== "new"){
+        printUnStep();
+    }
+}
+
+document.getElementById("process-list").onclick = function(evento){
+    let target = evento.target;
+    while(target.id === ""){
+        target = target.parentNode;
+    }
+    if(target.id === "process-list"){
+        return;
+    }
+    let processId;
+    if(target.id.includes("process-edit-")){
+        processId = target.id.replace("process-edit-","");
+        formProcess(processId);
+    } else if(target.id.includes("process-delete-")){
+        processId = target.id.replace("process-delete-","");
+        Process.delete(processId);
+        printProcess();
+    } else if(target.id === "process-run"){
+        Process.run().then((res){
+            
+        });
+    }
+};
+
+
 
 //-----------
 
