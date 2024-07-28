@@ -235,23 +235,25 @@ var Process = (function(){
             Your goal is: ${elAgente.goal}.
             Your backstory is: ${elAgente.backstory}`
         });
-        vecMsg(unaTarea.agent,{
-            "role":"user",
-            "content":
-            `Your task is: ${laTarea.description}.
-            Your expected output is: ${laTarea.expectedOutput}.
-            Use the following context for completing the task: ${laTarea.context}.`
-        });
         let len = vecPre.length;
         for(let i=0;i<len;i++){
             let unaPre = vecPre[i];
             vecMsg(unaTarea.agent,{
                 "role":"assistant",
                 "content":
-                `The following text was elaborated by this agent: ${unaPre.agent} with this goal: ${unaPre.task}.
+                `The following text was elaborated by this agent: "${unaPre.agent}" with this goal: ${unaPre.task}.
                 ${unaPre.response}.`
             }); 
         }
+        vecMsg(unaTarea.agent,{
+            "role":"user",
+            "content":
+            `Your task is: ${laTarea.description}.
+            Your expected output is: ${laTarea.expectedOutput}.
+            Use the following context for completing the task: ${laTarea.context}.
+            Consider all previous information as context and generate a response that aligns with your role and goal.
+            `
+        });
         return vecMsg;
     }
     async function evaluar(pos){
