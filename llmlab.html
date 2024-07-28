@@ -624,8 +624,8 @@ document.getElementById("process-list").onclick = function(evento){
         Process.delete(processId);
         printProcess();
     } else if(target.id === "process-run"){
-        Process.run().then((res){
-            
+        Process.run().then((res) => {
+            let len = res.length;
         });
     }
 };
