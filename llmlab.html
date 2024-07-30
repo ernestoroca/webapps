@@ -34,6 +34,7 @@ function formKey(){
     if(modales){
         modales.remove();
     }
+    let keyX = (Llms.getKey())?"****":"";
     
     modales = document.createElement("div");
     modales.classList.add("w3-modal");
@@ -44,7 +45,7 @@ function formKey(){
     <form class="w3-container">
       <p>
         <label>OpenGateway Key</label>
-        <input class="w3-input" type="text" id="modal-key">
+        <input class="w3-input" type="text" id="modal-key" value="${keyX}">
       </p>
       <p>
         <button id="modal-cancelar" class="w3-btn w3-blue">Mantener</button>
@@ -116,8 +117,8 @@ function modelData(){
     let model = document.getElementById("modal-model").value;
     let data = Llms.getData(llm,model);
     let pricing = data.pricing;
-    document.getElementById("modal-prompt").innerHTML = Math.round(1/pricing.prompt);
-    document.getElementById("modal-completion").innerHTML = Math.round(1/pricing.completion);
+    document.getElementById("modal-prompt").innerHTML = Math.round(1/(parseInt(pricing.prompt)*1000000));
+    document.getElementById("modal-completion").innerHTML = Math.round(1/(parseInt(pricing.completion)*1000000));
 }
 
 function printUnAgente(agenteid){
@@ -126,6 +127,7 @@ function printUnAgente(agenteid){
     document.getElementById("modal-goal").value = losDatos.goal;
     document.getElementById("modal-backstory").value = losDatos.backstory;
     document.getElementById("modal-llm").value = losDatos.llm;
+    modelOptions();
     document.getElementById("modal-model").value = losDatos.model;
 }
 
@@ -165,7 +167,7 @@ function formAgente(agenteid){
         <select class="w3-select" id="modal-model"></select>
       </p>
       <p>
-        <b>Pricing (Token/USD):</b> <span id="modal-prompt"></span> / <span id="modal-completion"></span>
+        <b>Pricing (M Token/USD):</b> <span id="modal-prompt"></span> / <span id="modal-completion"></span>
       </p>
       <p>
         <button id="modal-guardar" class="w3-btn w3-green">Guardar</button>
