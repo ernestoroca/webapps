@@ -34,7 +34,8 @@ function formKey(){
     if(modales){
         modales.remove();
     }
-    let keyX = (Llms.getKey())?"****":"";
+    let keyX = Llms.getKey();
+    keyX = (keyX)?"****":"";
     
     modales = document.createElement("div");
     modales.classList.add("w3-modal");
