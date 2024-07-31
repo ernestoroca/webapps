@@ -71,7 +71,7 @@ var Llms = (function(){
             localStorage.removeItem("Llm-OpenRouter");
         },
         getKey: function(){
-            localStorage.getItem("Llm-OpenRouter");
+            return localStorage.getItem("Llm-OpenRouter");
         },
         sendMsg: function(llm,model,messages){
             let key = localStorage.getItem("Llm-OpenRouter");
