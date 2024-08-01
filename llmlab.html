@@ -494,8 +494,7 @@ function setNewStep(){
     if(stepId === ""){
         return;
     }
-    let processId = document.getElementById("modal-process").value;
-    let elPaso = Process.read(processId);
+    let elPaso = Process.read(stepId);
     let boton = document.createElement("button");
     boton.id = "modal-previous-del-"+stepId;
     boton.classList.add("w3-btn","w3-red");
