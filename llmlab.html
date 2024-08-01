@@ -513,7 +513,7 @@ function setNewStep(){
 function printUnStep(){
     let processId = document.getElementById("modal-process").value;
     let elPaso = Process.read(processId);
-    document.getElementById("modal-label").innerHTML = elPaso.label;
+    document.getElementById("modal-label").value = elPaso.label;
     document.getElementById("modal-task").value = elPaso.taskid;
     let previos = "";
     let len = elPaso.preSteps.length;
