@@ -283,7 +283,7 @@ var Process = (function(){
         let res = await Llms.sendMsg(elAgente.llm,elAgente.model,vecMsg);
         let msg = res.choices[0].message.content;
         vecResponses[pos].msg = msg;
-        cb(elStep.label,res);
+        cb(elStep.label,msg);
         return true;
     }
     
