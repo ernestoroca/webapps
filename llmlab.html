@@ -123,8 +123,8 @@ function modelData(){
     let model = document.getElementById("modal-model").value;
     let data = Llms.getData(llm,model);
     let pricing = data.pricing;
-    document.getElementById("modal-prompt").innerHTML = Math.round(1/(parseInt(pricing.prompt)*1000000));
-    document.getElementById("modal-completion").innerHTML = Math.round(1/(parseInt(pricing.completion)*1000000));
+    document.getElementById("modal-prompt").innerHTML = Math.round(1/(parseFloat(pricing.prompt)*1000000));
+    document.getElementById("modal-completion").innerHTML = Math.round(1/(parseFloat(pricing.completion)*1000000));
 }
 
 function printUnAgente(agenteid){
