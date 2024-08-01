@@ -475,7 +475,7 @@ function taskOptions(){
         let unaTarea = Tasks.read(lista[i]);
         options += `<option value="${lista[i]}">${unaTarea.title}</option>`;
     }
-    document.getElementById("modal-task").innerHTML = options;
+    return options;
 }
 
 function processOptions(){
