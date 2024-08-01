@@ -22,6 +22,11 @@
   <div id="process" class="w3-container w3-hide">
     <div id="process-list" class="w3-row"></div>
   </div>
+
+  <button id="result-button" class="w3-btn w3-block w3-black w3-left-align">Process</button>
+  <div id="result" class="w3-container w3-hide">
+    <div id="result-list" class="w3-row"></div>
+  </div>
 </div>
 <script>
 
@@ -627,14 +632,29 @@ document.getElementById("process-list").onclick = function(evento){
         Process.delete(processId);
         printProcess();
     } else if(target.id === "process-run"){
-        Process.run().then((res) => {
-            let len = res.length;
-        });
+        cleanResult();
+        Process.run(addResult);
     }
 };
 
+//-----------
 
+function cleanResult(){
+    document.getElementById("result-list").innerHTML = "";
+}
 
+function addResult(proceso,result){
+    let div = document.createElement("div");
+    div.classList.add("w3-col","s12 m6");
+    div.innerHTML = `
+  <div class="w3-panel w3-card">
+    <h3>${proceso}</h3>
+    <p>${result}</p>
+  </div>
+        `;
+    document.getElementById("result-list").appendChild(div);
+}
+  
 //-----------
 
 function showHide(evento){
@@ -655,6 +675,7 @@ function showHide(evento){
 document.getElementById('agents-button').onclick = showHide;
 document.getElementById('tasks-button').onclick = showHide;
 document.getElementById('process-button').onclick = showHide;
+document.getElementById('result-button').onclick = showHide;
 
 window.onload = function(){
     printLosAgentes();
