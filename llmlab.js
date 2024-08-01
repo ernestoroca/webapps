@@ -238,14 +238,14 @@ var Process = (function(){
         let len = vecPre.length;
         for(let i=0;i<len;i++){
             let unaPre = vecPre[i];
-            vecMsg({
+            vecMsg.push({
                 "role":"assistant",
                 "content":
                 `The following text was elaborated by this agent: "${unaPre.agent}" with this goal: ${unaPre.task}.
                 ${unaPre.response}.`
             }); 
         }
-        vecMsg({
+        vecMsg.push({
             "role":"user",
             "content":
             `Your task is: ${laTarea.description}.
