@@ -281,7 +281,8 @@ var Process = (function(){
         let vecMsg = crearMensajes(laTarea,elAgente,vecPre);
         
         let res = await Llms.sendMsg(elAgente.llm,elAgente.model,vecMsg);
-        vecResponses[pos].msg = res;
+        let msg = res.choices[0].message.content;
+        vecResponses[pos].msg = msg;
         cb(elStep.label,res);
         return true;
     }
