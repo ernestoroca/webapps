@@ -486,7 +486,7 @@ function processOptions(){
         let unPaso = Process.read(lista[i]);
         options += `<option value="${lista[i]}">${unPaso.label}</option>`;
     }
-    document.getElementById("modal-previous-select").innerHTML = options;
+    return options;
 }
 
 function setNewStep(){
