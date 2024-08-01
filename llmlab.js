@@ -220,7 +220,7 @@ var Process = (function(){
         let len = vecResponses.length;
         for(let i=0;i<len;i++){
             if(vecResponses[i].id === id){
-                obj.response = vecResponses.msg;
+                obj.response = vecResponses[i].msg;
                 break;
             }
         }
@@ -356,7 +356,7 @@ var Process = (function(){
         run: async function(){
             let len = vecResponses.length;
             for(let i=0;i<len;i++){
-                vecResponse[i].msg = "";
+                vecResponses[i].msg = "";
             }
             let n;
             do{
