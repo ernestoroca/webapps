@@ -256,7 +256,7 @@ var Process = (function(){
         });
         return vecMsg;
     }
-    async function evaluar(pos){
+    async function evaluar(pos,cb){
         let elStep = read(vecResponses[pos].id);
         if(elStep.response !== ""){
             return true;
@@ -282,7 +282,7 @@ var Process = (function(){
         
         let res = await Llms.sendMsg(elAgente.llm,elAgente.model,vecMsg);
         vecResponses[pos].msg = res;
-        
+        cb(elStep.label,res);
         return true;
     }
     
@@ -353,7 +353,7 @@ var Process = (function(){
                 }
             }
         },
-        run: async function(){
+        run: async function(cb){
             let len = vecResponses.length;
             for(let i=0;i<len;i++){
                 vecResponses[i].msg = "";
@@ -362,7 +362,7 @@ var Process = (function(){
             do{
                 n = 0;
                 for(let i=0;i<len;i++){
-                    let res = await evaluar(i);
+                    let res = await evaluar(i,cb);
                     if(res) {
                         n++;
                     }
