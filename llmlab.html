@@ -123,9 +123,9 @@ function modelData(){
     let model = document.getElementById("modal-model").value;
     let data = Llms.getData(llm,model);
     let pricing = data.pricing;
-    let valor = 1/(parseFloat(pricing.prompt)*1000000));
+    let valor = 1/(parseFloat(pricing.prompt)*1000000);
     document.getElementById("modal-prompt").innerHTML = valor.toFixed(3);
-    valor = 1/(parseFloat(pricing.completion)*1000000));
+    valor = 1/(parseFloat(pricing.completion)*1000000);
     document.getElementById("modal-completion").innerHTML = valor.toFixed(3);
 }
 
