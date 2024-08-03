@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Web Apps</title>
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <script src="llmlab.js"></script>
+</head>
+<body>
+<div class="w3-container">
+  <div class="w3-card-4">
+    <div class="w3-container w3-green" id="config-click">
+      <h2>Chat Config</h2>
+    </div>
+    <form class="w3-container" id="config-show">
+      <p>
+       <label><b>Llm</b></label>
+       <select class="w3-select" id="llms"></select>
+      </p>
+      <p>
+        <label><b>Modelo</b></label>
+        <select class="w3-select" id="modelos"></select>
+      </p>
+      <p>
+        <label><b>System</b></label>
+        <select class="w3-select" id="prompts"></select>
+      </p>
+      <p>
+        <label>Instrucción</label><br>
+        <input type="text" id="label" placeholder="Label"><br>
+        <textarea class="w3-input w3-border w3-round" type="text" id="custom"></textarea>
+      </p>
+      <p>
+        <button class="w3-button w3-white w3-border w3-border-red w3-round-large" id="configurar">Configurar</button>
+      </p>
+    </form>
+  </div>
+</div>
+<div class="w3-container" id="respuestas"></div>    
+<div class="w3-container">
+  <div class="w3-card-4">
+    <div class="w3-container w3-green">
+      <h2>Pregunta</h2>
+    </div>
+    <form class="w3-container">
+      <p>
+        <textarea class="w3-input w3-border w3-round" type="text" id="pregunta"></textarea>
+      </p>
+      <p>
+        <button class="w3-button w3-white w3-border w3-border-red w3-round-large" id="preguntar">Enviar</button>
+        <span id="contador"></span>
+      </p>
+    </form>
+  </div>
+</div>
+<script>
+var usage = {
+  completion_tokens: 0,
+  prompt_tokens: 0
+};
+var losMensajes = [];
+    
+function formKey(){
+    let keyX = Llms.getKey();
+    keyX = (keyX)?"****":"";
+    let strHTML = `
+    <form class="w3-container">
+      <p>
+        <label>OpenGateway Key</label>
+        <input class="w3-input" type="text" id="modal-key" value="${keyX}">
+      </p>
+      <p>
+        <button id="modal-guardar" class="w3-btn w3-green">Modificar</button>
+        <button id="modal-borrar" class="w3-btn w3-red">Borrar</button>
+      </p>
+    </form>
+    `;
+    W3.modal(strHTML);
+    document.getElementById("modal-guardar").onclick = function(){
+        let key = document.getElementById("modal-key").value;
+        if(key === ""){
+            return;
+        }
+        Llms.setKey(key);
+    };
+    document.getElementById("modal-borrar").onclick = function(){
+        Llms.delKey();
+    };
+}
+
+function printModelos(){
+    let llm = document.getElementById("llms").value;
+    let lista = Llms.getModels(llm);
+    let len = lista.length;
+    let options = "";
+    for(let i=0;i<len;i++){
+        options += `<option value="${lista[i]}">${lista[i]}</option>`;
+    }
+    document.getElementById("modelos").innerHTML = options;
+}
+
+function printLms(){
+    let lista = Llms.getLlms();
+    let len = lista.length;
+    let options = "";
+    for(let i=0;i<len;i++){
+        options += `<option value="${lista[i]}">${lista[i]}</option>`;
+    }
+    document.getElementById("llms").innerHTML = options;
+    printModelos();
+}
+
+document.getElementById("llms").onchange = function(){
+    printModelos();
+};
+
+function printPrompts(){
+    let lista = Prompts.list();
+    let len = lista.length;
+    let options = "";
+    for(let i=0;i<len;i++){
+        let unPrompt = Prompts.read(lista[i]);
+        options += `<option value="${lista[i]}">${unPrompt.label}</option>`;
+    }
+    options += `<option value="new">Nuevo</option>`;
+    document.getElementById("prompts").innerHTML = options;
+    printCustom();
+}
+
+function printContador(){
+    
+}  
+
+function printCustom(){
+    let val = document.getElementById("prompts").value;
+    if(val === "new"){
+        document.getElementById("label").value = "";
+        document.getElementById("custom").value = "";
+    } else if (val !== ""){
+        let unPrompt = Prompts.read(val);
+        document.getElementById("label").value = unPrompt.label;
+        document.getElementById("custom").value = unPrompt.prompt;
+    }
+}
+
+document.getElementById("prompts").onchange = printCustom;
+
+document.getElementById("configurar").onclick = function(event){
+    event.preventDefault();
+    let label = document.getElementById("label").value;
+    let custom = document.getElementById("custom").value;
+    let prompt = document.getElementById("prompts").value;
+    if(prompt === "new"){
+        Prompts.create(label,custom);
+    } else {
+        Prompts.update(prompt,label,custom);
+    }
+    printPrompts();
+    document.getElementById("label").value = "";
+    document.getElementById("custom").value = "";
+    document.getElementById("prompts").value = "new";
+}
+
+document.getElementById("preguntar").onclick = function(event){
+    event.preventDefault();
+    let pregunta = document.getElementById("pregunta").value;
+    let custom = document.getElementById("custom").value;
+    if(pregunta === "" || custom === ""){
+        W3.toast("Falta pregunta o custom",3000);
+        return;
+    }
+    if(custom.includes("<<") || custom.includes(">>")){
+        W3.toast("Custom no puede contener << o >>",3000);
+        return;
+    };
+    let llm = document.getElementById("llms").value;
+    let model = document.getElementById("modelos").value;
+    let mensajes = [];
+    mensajes.push({
+      "role":"system",
+      "content":custom
+    });
+    let len = losMensajes.length;
+    for(let i=0;i<len;i++){
+        mensajes.push(losMensajes[i]);
+    }
+    mensajes.push({
+      "role":"user",
+      "content":pregunta
+    });
+    Llms.sendMsg(llm,model,mensajes).then((respuesta) => {
+        printContador();
+        let div = document.createElement("div");
+        div.classList.add("w3-panel","w3-pale-blue","w3-leftbar","w3-rightbar","w3-border-blue");
+        div.innerHTML = respuesta.message;
+        document.getElementById('respuestas').appendChild(div);
+        losMensajes.push({
+            "role":"assistant",
+            "content":respuesta.message
+        });
+        document.getElementById("pregunta").value = "";
+    });
+};
+
+document.getElementById("config-click").onclick = function(){
+    let x = document.getElementById("config-show");
+    x.style.display = (x.style.display === "none") ? "block" : "none";
+};
+
+window.onload = function(){
+    formKey();
+    Llms.init().then(printLms);
+    printPrompts();
+    W3.textarea("custom");
+    W3.textarea("pregunta");
+};
+
+</script>
+</body>
+</html>
