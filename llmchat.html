@@ -134,7 +134,8 @@ function printPrompts(){
 }
 
 function printContador(){
-    
+    let texto = `Prompt: ${usage.prompt_tokens};  Completion: ${usage.completion_tokens}`;
+    W3.toast(texto,10000);
 }  
 
 function printCustom(){
@@ -150,6 +151,12 @@ function printCustom(){
         document.getElementById("custom-user").value = unPrompt.user;
         document.getElementById("pregunta").value = unPrompt.user;
     }
+    losMensajes = [];
+    document.getElementById('respuestas').innerHTML = "";
+    usage = {
+      completion_tokens: 0,
+      prompt_tokens: 0
+    };
 }
 
 document.getElementById("prompts").onchange = printCustom;
@@ -200,6 +207,8 @@ document.getElementById("preguntar").onclick = function(event){
       "content":pregunta
     });
     Llms.sendMsg(llm,model,mensajes).then((respuesta) => {
+        usage.completion_tokens = respuesta.completion;
+        usage.prompt_tokens = respuesta.prompt;
         printContador();
         let div = document.createElement("div");
         div.classList.add("w3-panel","w3-pale-blue","w3-leftbar","w3-rightbar","w3-border-blue");
@@ -210,6 +219,9 @@ document.getElementById("preguntar").onclick = function(event){
             "content":respuesta.message
         });
         document.getElementById("pregunta").value = "";
+    }).catch((error) => {
+        console.log(error);
+        W3.toast(error,5000);
     });
 };
 
