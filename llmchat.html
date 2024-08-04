@@ -28,7 +28,12 @@
       <p>
         <label>Instrucción</label><br>
         <input type="text" id="label" placeholder="Label"><br>
-        <textarea class="w3-input w3-border w3-round" type="text" id="custom"></textarea>
+        <textarea class="w3-input w3-border w3-round" type="text" id="custom-system"></textarea>
+      </p>
+      <p>
+        <label>Pregunta</label><br>
+        <input type="text" id="label" placeholder="Label"><br>
+        <textarea class="w3-input w3-border w3-round" type="text" id="custom-user"></textarea>
       </p>
       <p>
         <button class="w3-button w3-white w3-border w3-border-red w3-round-large" id="configurar">Configurar</button>
@@ -139,7 +144,9 @@ function printCustom(){
     } else if (val !== ""){
         let unPrompt = Prompts.read(val);
         document.getElementById("label").value = unPrompt.label;
-        document.getElementById("custom").value = unPrompt.prompt;
+        document.getElementById("custom-system").value = unPrompt.system;
+        document.getElementById("custom-user").value = unPrompt.user;
+        document.getElementById("pregunta").value = unPrompt.user;
     }
 }
 
@@ -148,16 +155,18 @@ document.getElementById("prompts").onchange = printCustom;
 document.getElementById("configurar").onclick = function(event){
     event.preventDefault();
     let label = document.getElementById("label").value;
-    let custom = document.getElementById("custom").value;
-    let prompt = document.getElementById("prompts").value;
-    if(prompt === "new"){
-        Prompts.create(label,custom);
+    let customSys = document.getElementById("custom-system").value;
+    let customUsr = document.getElementById("custom-user").value;
+    let promptid = document.getElementById("prompts").value;
+    if(promptid === "new"){
+        Prompts.create(label,customSys,customUsr);
     } else {
-        Prompts.update(prompt,label,custom);
+        Prompts.update(prompt,label,customSys,customUsr);
     }
     printPrompts();
     document.getElementById("label").value = "";
-    document.getElementById("custom").value = "";
+    document.getElementById("custom-system").value = "";
+    document.getElementById("custom-user").value = "";
     document.getElementById("prompts").value = "new";
 }
 
