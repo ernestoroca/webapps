@@ -267,7 +267,7 @@ var Prompts = (function(){
             let obj = JSON.parse(str);
             return obj;
         },
-        update: function(id,label,systen,user){
+        update: function(id,label,system,user){
             let obj = {
                 label: label,
                 system: system,
