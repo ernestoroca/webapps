@@ -161,7 +161,7 @@ document.getElementById("configurar").onclick = function(event){
     if(promptid === "new"){
         Prompts.create(label,customSys,customUsr);
     } else {
-        Prompts.update(prompt,label,customSys,customUsr);
+        Prompts.update(promptid,label,customSys,customUsr);
     }
     printPrompts();
     document.getElementById("label").value = "";
