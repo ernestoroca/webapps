@@ -220,7 +220,8 @@ window.onload = function(){
     formKey();
     Llms.init().then(printLms);
     printPrompts();
-    W3.textarea("custom");
+    W3.textarea("custom-system");
+    W3.textarea("custom-user");
     W3.textarea("pregunta");
 };
 
