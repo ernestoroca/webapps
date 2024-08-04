@@ -111,7 +111,9 @@ function printLms(){
         options += `<option value="${lista[i]}">${lista[i]}</option>`;
     }
     document.getElementById("llms").innerHTML = options;
+    document.getElementById("llms").value = "google";
     printModelos();
+    document.getElementById("modelos").value = "gemma-2-9b-it:free";
 }
 
 document.getElementById("llms").onchange = function(){
