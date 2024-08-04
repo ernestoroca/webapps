@@ -140,7 +140,8 @@ function printCustom(){
     let val = document.getElementById("prompts").value;
     if(val === "new"){
         document.getElementById("label").value = "";
-        document.getElementById("custom").value = "";
+        document.getElementById("custom-system").value = "";
+        document.getElementById("custom-user").value = "";
     } else if (val !== ""){
         let unPrompt = Prompts.read(val);
         document.getElementById("label").value = unPrompt.label;
