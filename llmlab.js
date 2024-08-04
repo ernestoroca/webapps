@@ -245,10 +245,11 @@ var Llms = (function(){
 
 var Prompts = (function(){
     return {
-        create: function(label,prompt){
+        create: function(label,system,user){
             let obj = {
                 label: label,
-                prompt: prompt
+                system: prompt,
+                user: user
             };
             let str = JSON.stringify(obj);
             let id,x;
@@ -266,10 +267,11 @@ var Prompts = (function(){
             let obj = JSON.parse(str);
             return obj;
         },
-        update: function(id,label,prompt){
+        update: function(id,label,systen,user){
             let obj = {
                 label: label,
-                prompt: prompt
+                system: prompt,
+                user: user
             };
             let str = JSON.stringify(obj);
             localStorage.setItem("Prompt-"+id,str);
