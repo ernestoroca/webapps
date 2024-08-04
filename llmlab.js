@@ -248,7 +248,7 @@ var Prompts = (function(){
         create: function(label,system,user){
             let obj = {
                 label: label,
-                system: prompt,
+                system: system,
                 user: user
             };
             let str = JSON.stringify(obj);
@@ -270,7 +270,7 @@ var Prompts = (function(){
         update: function(id,label,systen,user){
             let obj = {
                 label: label,
-                system: prompt,
+                system: system,
                 user: user
             };
             let str = JSON.stringify(obj);
