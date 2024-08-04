@@ -232,6 +232,9 @@ var Llms = (function(){
                 }
                 return response.json();
             }).then((response) => {
+                if(response.error){
+                    return Promise.reject(Error(response.error.message));
+                }
                 let obj = {
                     prompt: response.usage.prompt_tokens,
                     completion: response.usage.completion_tokens,
