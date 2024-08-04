@@ -173,7 +173,7 @@ document.getElementById("configurar").onclick = function(event){
 document.getElementById("preguntar").onclick = function(event){
     event.preventDefault();
     let pregunta = document.getElementById("pregunta").value;
-    let custom = document.getElementById("custom").value;
+    let custom = document.getElementById("custom-system").value;
     if(pregunta === "" || custom === ""){
         W3.toast("Falta pregunta o custom",3000);
         return;
