@@ -206,6 +206,7 @@ document.getElementById("preguntar").onclick = function(event){
       "role":"user",
       "content":pregunta
     });
+    W3.toast("Sent",5000);
     Llms.sendMsg(llm,model,mensajes).then((respuesta) => {
         usage.completion_tokens = respuesta.completion;
         usage.prompt_tokens = respuesta.prompt;
@@ -214,6 +215,10 @@ document.getElementById("preguntar").onclick = function(event){
         div.classList.add("w3-panel","w3-pale-blue","w3-leftbar","w3-rightbar","w3-border-blue");
         div.innerHTML = respuesta.message;
         document.getElementById('respuestas').appendChild(div);
+        losMensajes.push({
+            "role":"user",
+            "content":pregunta
+        })
         losMensajes.push({
             "role":"assistant",
             "content":respuesta.message
