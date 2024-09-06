@@ -140,6 +140,7 @@ document.getElementById("llms").onchange = function(){
 document.getElementById("reset").onclick = function(event){
     event.preventDefault();
     losMensajes = [];
+    document.getElementById('respuestas').innerHTML = "";
 };
 
 function printPrompts(){
