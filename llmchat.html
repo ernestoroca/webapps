@@ -19,7 +19,8 @@
       </p>
       <p>
         <label><b>Modelo</b></label>
-        <select class="w3-select" id="modelos"></select>
+        <select class="w3-select" id="modelos"></select><br>
+        <span id="precios"></span>
       </p>
       <p>
         <label><b>System</b></label>
@@ -102,6 +103,19 @@ function printModelos(){
     }
     document.getElementById("modelos").innerHTML = options;
 }
+
+function modelData(){
+    let llm = document.getElementById("llms").value;
+    let model = document.getElementById("modelos").value;
+    let data = Llms.getData(llm,model);
+    let pricing = data.pricing;
+    let valor = 1/(parseFloat(pricing.prompt)*1000000);
+    let str = "" + valor.toFixed(3) +" / ";
+    valor = 1/(parseFloat(pricing.completion)*1000000);
+    str += valor.toFixed(3);
+    document.getElementById("precios").innerHTML = str;
+}
+document.getElementById("prompts").onchange = modelData;
 
 function printLms(){
     let lista = Llms.getLlms();
