@@ -137,7 +137,8 @@ document.getElementById("llms").onchange = function(){
     printModelos();
 };
 
-document.getElementById("reset").onclick = function(){
+document.getElementById("reset").onclick = function(event){
+    event.preventDefault();
     losMensajes = [];
 };
 
