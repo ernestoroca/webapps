@@ -149,7 +149,7 @@ var Llms = (function(){
     return {
         init: function(){
             return fetch("https://openrouter.ai/api/v1/models", {
-              method: "POST",
+              method: "GET",
               headers: {
                 "Content-Type": "application/json"
               },
