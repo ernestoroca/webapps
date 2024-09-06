@@ -102,6 +102,7 @@ function printModelos(){
         options += `<option value="${lista[i]}">${lista[i]}</option>`;
     }
     document.getElementById("modelos").innerHTML = options;
+    modelData();
 }
 
 function modelData(){
@@ -128,6 +129,7 @@ function printLms(){
     document.getElementById("llms").value = "google";
     printModelos();
     document.getElementById("modelos").value = "gemma-2-9b-it:free";
+    modelData();
 }
 
 document.getElementById("llms").onchange = function(){
