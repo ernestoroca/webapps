@@ -250,7 +250,10 @@ document.getElementById("preguntar").onclick = function(event){
             "role":"assistant",
             "content":respuesta.message
         });
-        document.getElementById("pregunta").value = "";
+        let elem = document.getElementById("pregunta");
+        elem.value = document.getElementById("custom-user").value;
+        elem.style.height = "auto";
+        elem.style.height = `${elem.scrollHeight}px`;
     }).catch((error) => {
         console.log(error);
         W3.toast(error,5000);
