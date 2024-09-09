@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Web Apps</title>
+  <title>Llm Chat</title>
   <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
   <script src="llmlab.js"></script>
 </head>
@@ -141,6 +141,7 @@ document.getElementById("reset").onclick = function(event){
     event.preventDefault();
     losMensajes = [];
     document.getElementById('respuestas').innerHTML = "";
+    document.getElementById("pregunta").value = document.getElementById("custom-user").value;
 };
 
 function printPrompts(){
