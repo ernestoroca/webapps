@@ -141,7 +141,10 @@ document.getElementById("reset").onclick = function(event){
     event.preventDefault();
     losMensajes = [];
     document.getElementById('respuestas').innerHTML = "";
-    document.getElementById("pregunta").value = document.getElementById("custom-user").value;
+    let elem = document.getElementById("pregunta");
+    elem.value = document.getElementById("custom-user").value;
+    elem.style.height = "auto";
+    elem.style.height = `${elem.scrollHeight}px`;
 };
 
 function printPrompts(){
