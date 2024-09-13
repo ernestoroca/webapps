@@ -111,10 +111,18 @@ function modelData(){
     let model = document.getElementById("modelos").value;
     let data = Llms.getData(llm,model);
     let pricing = data.pricing;
+    
+    //millon de tokens por 1 dolar
     let valor = 1/(parseFloat(pricing.prompt)*1000000);
     let str = "" + valor.toFixed(3) +" / ";
     valor = 1/(parseFloat(pricing.completion)*1000000);
     str += valor.toFixed(3);
+    
+    //dolares por página
+    valor = parseFloat(pricing.prompt)*1154;
+    str += "   ; " + valor.toFixed(3);
+    valor = parseFloat(pricing.completion)*1154;
+    str += " / " + valor.toFixed(3);
     document.getElementById("precios").innerHTML = str;
 }
 document.getElementById("modelos").onchange = modelData;
