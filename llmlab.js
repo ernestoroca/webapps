@@ -211,21 +211,23 @@ var Llms = (function(){
         getKey: function(){
             return localStorage.getItem("Llm-OpenRouter");
         },
-        sendMsg: function(llm,model,messages){
+        sendMsg: function(llm,model,messages,temperature){
             let key = localStorage.getItem("Llm-OpenRouter");
             if(!key){
                 return Promise.reject(Error("Ingrese la clave"));
             }
+            let body = {
+                "model": llm+"/"+model,
+                "messages": messages,
+                "temperature": temperature
+            };
             return fetch("https://openrouter.ai/api/v1/chat/completions", {
               method: "POST",
               headers: {
                 "Authorization": `Bearer ${key}`,
                 "Content-Type": "application/json"
               },
-              body: JSON.stringify({
-                "model": llm+"/"+model,
-                "messages": messages,
-              }),
+              body: JSON.stringify(body),
             }).then((response) => {
                 if(!response.ok){
                     return Promise.reject(Error(response.status));
