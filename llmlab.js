@@ -76,7 +76,7 @@ class Manager {
     addAgent(agent){
         this.agents.push(agent);
     }
-    async #makeSummary(analysisResults){
+    async #makeSummary(subject, analysisResults){
         let mensajes = [];
         mensajes.push({
             "role":"system",
@@ -138,7 +138,7 @@ class Manager {
                 result: result
             });
         }
-        return await this.#makeSummary(analysisResults);
+        return await this.#makeSummary(subject,analysisResults);
     }
 }
 
