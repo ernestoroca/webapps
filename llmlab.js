@@ -1,9 +1,9 @@
 class Agent {
-    constructor(name,system,process,thinking,temperature) {
+    constructor(name,system,process,temperature) {
         this.name = name;
         this.system = system;
         this.process = process;
-        this.thinking = thinking;
+        this.thinking = null;
         this.temperature = temperature;
         this.llm = "";
         this.model = "";
@@ -12,6 +12,9 @@ class Agent {
     setLlms(llm,model){
         this.llm = llm;
         this.model = model;
+    }
+    setThinking(fun){
+        this.thinking = fun;
     }
     async respond(subject) {
         let prompt = "**Subject**: "+ subject;
@@ -52,13 +55,13 @@ class Agent {
 }
 
 class Manager {
-    constructor(name,system,process,test,summary,thinking) {
+    constructor(name,system,process,test,summary) {
         this.name = name;
         this.system = system;
         this.task = process;
         this.test = test;
         this.summary = summary;
-        this.thinking = thinking;
+        this.thinking = null;
         this.llm = "";
         this.model = "";
         this.agents = [];
@@ -66,6 +69,9 @@ class Manager {
     setLlms(llm,model){
         this.llm = llm;
         this.model = model;
+    }
+    setThinking(fun){
+        this.thinking = fun;
     }
     addAgent(agent){
         this.agents.push(agent);
