@@ -105,7 +105,7 @@ function modelData(){
     str += " / " + valor.toFixed(3);
     document.getElementById("precios").innerHTML = str;
 }
-document.getElementById("modelos").onchange = modelData;
+
 
 function printLms(){
     let lista = Llms.getLlms();
@@ -135,6 +135,8 @@ function imprimirRespuesta(message){
 document.getElementById("modelos").onchange = function(){
     let llm = document.getElementById("llms").value;
     let model = document.getElementById("modelos").value;
+
+    modelData();
 
     generalManager.setLlms(llm,model);
     analyticalManager.setLlms(llm,model);
