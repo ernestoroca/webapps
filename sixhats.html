@@ -125,10 +125,10 @@ document.getElementById("llms").onchange = function(){
     printModelos();
 };
 
-function imprimirRespuesta(message){
+function imprimirRespuesta(name,message,prompt,completion){
     let div = document.createElement("div");
     div.classList.add("w3-panel","w3-pale-blue","w3-leftbar","w3-rightbar","w3-border-blue");
-    div.innerHTML = message;
+    div.innerHTML = `<h3>${name}: (${prompt}; ${completion})</h3><p>${message}</p>`;
     document.getElementById('respuestas').appendChild(div);
 }
   
