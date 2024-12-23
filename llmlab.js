@@ -126,7 +126,7 @@ class Manager {
             let err = "";
             while(n < 3){
                 result = await agent.respond(subject + err);
-                let err = await this.#isSatisfactoryResponse(subject, result);
+                err = await this.#isSatisfactoryResponse(subject, result);
                 if(err.length < 10){
                     break;
                 }
