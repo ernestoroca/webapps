@@ -5,6 +5,7 @@
   <title>Llm Chat</title>
   <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
   <script src="llmlab.js"></script>
+  <script src="common.js"></script>
 </head>
 <body>
 <div class="w3-container">
@@ -44,10 +45,6 @@
   </div>
 </div>
 <script>
-var usage = {
-  completion_tokens: 0,
-  prompt_tokens: 0
-};
     
 function formKey(){
     let keyX = Llms.getKey();
@@ -128,85 +125,174 @@ document.getElementById("llms").onchange = function(){
     printModelos();
 };
 
+function imprimirRespuesta(message){
+    let div = document.createElement("div");
+    div.classList.add("w3-panel","w3-pale-blue","w3-leftbar","w3-rightbar","w3-border-blue");
+    div.innerHTML = message;
+    document.getElementById('respuestas').appendChild(div);
+}
+  
+document.getElementById("modelos").onchange = function(){
+    let llm = document.getElementById("llms").value;
+    let model = document.getElementById("modelos").value;
+
+    generalManager.setLlms(llm,model);
+    analyticalManager.setLlms(llm,model);
+    excecutiveManager.setLlms(llm,model);
+  
+    whiteHat.setLlms(llm,model);
+    redHat.setLlms(llm,model);
+    blackHat.setLlms(llm,model);
+    yellowHat.setLlms(llm,model);
+    greenHat.setLlms(llm,model);
+    blueHat.setLlms(llm,model);
+ 
+    navyShoe.setLlms(llm,model);
+    greyShoe.setLlms(llm,model);
+    brownShoe.setLlms(llm,model);
+    orangeShoe.setLlms(llm,model);
+    pinkShoe.setLlms(llm,model);
+    purpleShoe.setLlms(llm,model);
+};
+
+const analyticalManager = new Manager("analytical",
+    "expert in analitycal",
+    "Analyze the following perspectives and synthesize a comprehensive understanding of the **subject**.",
+    "Evaluate the following analysis related to **subject**: Does it provide factual evidence, objective insights, and address the core aspects of the topic? Is it free of opinions and assumptions? Answer 'yes' if it meets these criteria, otherwise, provide specific feedback on what's missing or needs improvement.",
+    "Synthesize the key findings and insights from each of the following agent perspectives on **subject**. Group similar ideas and identify any contradictions or areas of consensus. Focus on creating a cohesive and informative summary."
+);
+const whiteHat = new Agent("White Hat",
+    "You are expert in finding facts and information.",
+    "As a factual expert, provide information, data, and objective insights related to **subject**. Focus on verifiable details and avoid opinions.",
+    1.2
+);
+const redHat = new Agent("Red Hat",
+    "You are expert in analazying emotions and feelings.",
+    "Express intuitive feelings, gut reactions, and potential emotional responses about the **subject**.",
+    1.2
+);
+const blackHat = new Agent("Black Hat",
+    "You are expert in detecting potential problems and you are very cautious.",
+    "Identify potential risks, drawbacks, negative consequences, and areas of concern about the **subject**.",
+    1.2
+);
+const yellowHat = new Agent("Yellow Hat",
+    "You are very optimist and always looking for benefits.",
+    "Highlight the potential benefits, positive aspects, opportunities, and optimistic outcomes related with the **subject**.",
+    1.2
+);
+const greenHat = new Agent("Green Hat",
+    "You are very creative and full of ideas.",
+    "Generate many new ideas, creative solutions, alternatives, and innovative approaches about the **subject**.",
+    1.2
+);
+const blueHat = new Agent("Blue Hat",
+    "You are very rational and expert in defining process management and control of thinking.",
+    "Summarize the key findings and control the direction of thought about the **subject**.",
+    1.2
+);
+analyticalManager.addAgent(whiteHat);
+analyticalManager.addAgent(redHat);
+analyticalManager.addAgent(blackHat);
+analyticalManager.addAgent(yellowHat);
+analyticalManager.addAgent(greenHat); 
+analyticalManager.addAgent(blueHat);
+
+const excecutiveManager = new Manager("excecutive",
+    "expert in defining task",
+    "Analyze the following perspectives and elaborate tasks and process about the **subject**.",
+    "Evaluate the following analysis related to **subject**: Does it provide factual evidence, objective insights, and address the core aspects of the topic? Is it free of opinions and assumptions? Answer 'yes' if it meets these criteria, otherwise, provide specific feedback on what's missing or needs improvement.",
+    "Synthesize the key findings and insights from each of the following agent perspectives on **subject**. Group similar ideas and identify any contradictions or areas of consensus. Focus on creating a cohesive and informative summary.",
+    logg
+);
+const navyShoe = new Agent("Navy Formal Shoe",
+    "You are expert in define routine and official actions.",
+    "Suggest actions about the **subject**. Focus on established procedures, protocols, and formal processes.",
+    logg,
+    1.2
+);
+const greyShoe = new Agent("Grey Sneaker",
+    "You are expert in exploratory and investigative actions.",
+    "Suggest actions about the **subject**. Focus on gathering more information, researching, and understanding the situation better.",
+    logg,
+    1.2
+);
+const brownShoe = new Agent("Brown Brogue",
+    "You are expert in practical and down-to-earth actions.",
+    "Suggest actions about the **subject**. Focus on tangible results, efficiency, and practical implementation.",
+    logg,
+    1.2
+);
+const orangeShoe = new Agent("Orange Gumboot",
+    "You are expert in emergency and urgent actions.",
+    "Suggest actions about the **subject**. Focus on immediate responses to critical problems and urgent situations.",
+    logg,
+    1.2
+);
+const pinkShoe = new Agent("Pink Slipper",
+    "You are expert in caring and humanistic actions.",
+    "Auggest actions about the **subject**. Focus on people, feelings, empathy, and the well-being of those involved.",
+    logg,
+    1.2
+);
+const purpleShoe = new Agent("Purple Riding Boot",
+    "You are expert in authoritative and decisive actions.",
+    "Suggest actions about the **subject**. Focus on leadership, command, control, and clear direction.",
+    logg,
+    1.2
+);
+excecutiveManager.addAgent(navyShoe);
+excecutiveManager.addAgent(greyShoe);
+excecutiveManager.addAgent(brownShoe);
+excecutiveManager.addAgent(orangeShoe);
+excecutiveManager.addAgent(pinkShoe);
+excecutiveManager.addAgent(purpleShoe);
+
+const generalManager = new Manager("general",
+    "expert in management of teams",
+    "elaborate tasks and give commands about the **subject**.",
+    "Evaluate the following analysis related to **subject**: Does it provide factual evidence, objective insights, and address the core aspects of the topic? Is it free of opinions and assumptions? Answer 'yes' if it meets these criteria, otherwise, provide specific feedback on what's missing or needs improvement.",
+    "Make a summary of the all the responses"
+);
+generalManager.addAgent(analyticalManager);
+generalManager.addAgent(excecutiveManager);
+  
+generalManager.setThinking(imprimirRespuesta);
+analyticalManager.setThinking(imprimirRespuesta);
+excecutiveManager.setThinking(imprimirRespuesta);
+  
+whiteHat.setThinking(imprimirRespuesta);
+redHat.setThinking(imprimirRespuesta);
+blackHat.setThinking(imprimirRespuesta);
+yellowHat.setThinking(imprimirRespuesta);
+greenHat.setThinking(imprimirRespuesta);
+blueHat.setThinking(imprimirRespuesta);
+
+navyShoe.setThinking(imprimirRespuesta);
+greyShoe.setThinking(imprimirRespuesta);
+brownShoe.setThinking(imprimirRespuesta);
+orangeShoe.setThinking(imprimirRespuesta);
+pinkShoe.setThinking(imprimirRespuesta);
+purpleShoe.setThinking(imprimirRespuesta);
+
 document.getElementById("reset").onclick = function(event){
     event.preventDefault();
     document.getElementById('respuestas').innerHTML = "";
     let elem = document.getElementById("pregunta");
+    elem..innerHTML = "";
     elem.style.height = "auto";
     elem.style.height = `${elem.scrollHeight}px`;
 };
-
-function printPrompts(){
-    let lista = Prompts.list();
-    let len = lista.length;
-    let options = "";
-    for(let i=0;i<len;i++){
-        let unPrompt = Prompts.read(lista[i]);
-        options += `<option value="${lista[i]}">${unPrompt.label}</option>`;
-    }
-    options += `<option value="new">Nuevo</option>`;
-    document.getElementById("prompts").innerHTML = options;
-    printCustom();
-}
-
-function printContador(){
-    let texto = `Prompt: ${usage.prompt_tokens};  Completion: ${usage.completion_tokens}`;
-    W3.toast(texto,10000);
-}  
-
 
 document.getElementById("preguntar").onclick = function(event){
     event.preventDefault();
     let pregunta = document.getElementById("pregunta").value;
 
-    if(pregunta === "" || custom === ""){
-        W3.toast("Falta pregunta o custom",3000);
+    if(pregunta === ""){
+        W3.toast("Falta pregunta",3000);
         return;
     }
-    if(custom.includes("<<") || custom.includes(">>")){
-        W3.toast("Custom no puede contener << o >>",3000);
-        return;
-    };
-    let llm = document.getElementById("llms").value;
-    let model = document.getElementById("modelos").value;
-    let mensajes = [];
-    mensajes.push({
-      "role":"system",
-      "content":custom
-    });
-    let len = losMensajes.length;
-    for(let i=0;i<len;i++){
-        mensajes.push(losMensajes[i]);
-    }
-    mensajes.push({
-      "role":"user",
-      "content":pregunta
-    });
-    W3.toast("Sent",5000);
-    Llms.sendMsg(llm,model,mensajes).then((respuesta) => {
-        usage.completion_tokens = respuesta.completion;
-        usage.prompt_tokens = respuesta.prompt;
-        printContador();
-        let div = document.createElement("div");
-        div.classList.add("w3-panel","w3-pale-blue","w3-leftbar","w3-rightbar","w3-border-blue");
-        div.innerHTML = respuesta.message;
-        document.getElementById('respuestas').appendChild(div);
-        losMensajes.push({
-            "role":"user",
-            "content":pregunta
-        })
-        losMensajes.push({
-            "role":"assistant",
-            "content":respuesta.message
-        });
-        let elem = document.getElementById("pregunta");
-        elem.value = document.getElementById("custom-user").value;
-        elem.style.height = "auto";
-        elem.style.height = `${elem.scrollHeight}px`;
-    }).catch((error) => {
-        console.log(error);
-        W3.toast(error,5000);
-    });
+    generalManager.respond(pregunta);
 };
 
 document.getElementById("config-click").onclick = function(){
@@ -217,9 +303,6 @@ document.getElementById("config-click").onclick = function(){
 window.onload = function(){
     formKey();
     Llms.init().then(printLms);
-    printPrompts();
-    W3.textarea("custom-system");
-    W3.textarea("custom-user");
     W3.textarea("pregunta");
 };
 
