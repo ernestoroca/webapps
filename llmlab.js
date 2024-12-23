@@ -114,7 +114,7 @@ class Manager {
             "content":this.test +"\n\n**subject** "+ subject +"\n\n**result** "+ result
         });
         
-        let respuesta = await Llms.sendMsg(this.llm,this.model,mensajes);
+        let respuesta = await Llms.sendMsg(this.llm,this.model,mensajes,1);
 
         return respuesta.message;
     }
