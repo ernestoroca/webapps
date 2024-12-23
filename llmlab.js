@@ -144,6 +144,132 @@ var W3 = (function(){
     };
 }());
 
+class Agent {
+    constructor(name,system,process,thinking,temperature) {
+        this.name = name;
+        this.system = system;
+        this.process = process;
+        this.thinking = thinking;
+        this.temperature = temperature;
+        this.mensajes = [];
+    }
+    async respond(subject) {
+        let prompt = "**Subject**: "+ subject;
+        prompt += "\n\n**Process**: "+ this.process;
+        prompt += "\n\nExplain your reasoning step-by-step before providing the final response.";
+        prompt += "\n\nAfter your response, provide a confidence score (1-10) indicating how confident you are in the accuracy and completeness of your answer.";
+
+        let mensajes = [];
+        mensajes.push({
+          "role":"system",
+          "content":this.system
+        });
+        let len = this.mensajes.length;
+        for(let i=0;i<len;i++){
+            mensajes.push(this.mensajes[i]);
+        }
+        mensajes.push({
+          "role":"user",
+          "content":prompt
+        });
+
+        let respuesta = await Llms.sendMsg(llm,model,mensajes,this.temperature);
+        this.mensajes.push({
+            "role":"user",
+            "content":prompt,
+            "prompt_tokens":respuesta.prompt
+        });
+        this.mensajes.push({
+            "role":"assistant",
+            "content":respuesta.message,
+            "completion_tokens":respuesta.completion,
+        });
+        if(this.thinking){
+            this.thinking(this.name,respuesta.message,respuesta.prompt,respuesta.completion);
+        }
+        return respuesta.message;
+    }
+}
+
+class Manager {
+    constructor(name,system,process,test,summary,thinking) {
+        this.name = name;
+        this.system = system;
+        this.task = process;
+        this.test = test;
+        this.summary = summary;
+        this.thinking = thinking;
+        this.agents = [];
+    }
+    addAgent(agent){
+        this.agents.push(agent);
+    }
+    async #makeSummary(analysisResults){
+        let mensajes = [];
+        mensajes.push({
+            "role":"system",
+            "content":this.system
+        });
+
+        mensajes.push({
+            "role":"user",
+            "content":this.summary +"\n\n**subject** "+ subject
+        });
+
+        let len = analysisResults.length;
+        for(let i=0;i<len;i++){
+            mensajes.push({
+                "role":"user",
+                "content":analysisResults[i].result
+            });
+        }
+        
+        let respuesta = await Llms.sendMsg(llm,model,mensajes,1);
+        if(this.thinking){
+            this.thinking(this.name,respuesta.message,respuesta.prompt,respuesta.completion);
+        }
+        return respuesta.message;
+    }
+    async #isSatisfactoryResponse(subject, result) {
+        let mensajes = [];
+        mensajes.push({
+            "role":"system",
+            "content":this.system
+        });
+
+        mensajes.push({
+            "role":"user",
+            "content":this.test +"\n\n**subject** "+ subject +"\n\n**result** "+ result
+        });
+        
+        let respuesta = await Llms.sendMsg(llm,model,mensajes);
+
+        return respuesta.message;
+    }
+    async respond(subject) {
+        const analysisResults = [];
+        for (const agent of this.agents) {
+            let n = 0; 
+            let result;
+            let err = "";
+            while(n < 3){
+                result = await agent.respond(subject + err);
+                let err = await this.#isSatisfactoryResponse(subject, result);
+                if(err.length < 10){
+                    break;
+                }
+                err = "\n\n**Make this corrections** "+ err;
+                n++;
+            }
+            analysisResults.push({
+                name: agent.name,
+                result: result
+            });
+        }
+        return await this.#makeSummary(analysisResults);
+    }
+}
+
 var Llms = (function(){
     let datos = null;
     return {
