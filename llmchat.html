@@ -58,8 +58,8 @@
 </div>
 <script>
 var usage = {
-  completion_tokens: 0,
-  prompt_tokens: 0
+  completion: 0,
+  prompt: 0
 };
 var losMensajes = [];
     
@@ -146,8 +146,8 @@ document.getElementById("reset").onclick = function(event){
     event.preventDefault();
     losMensajes = [];
     usage = {
-      completion_tokens: 0,
-      prompt_tokens: 0
+      completion: 0,
+      prompt: 0
     };
     document.getElementById('respuestas').innerHTML = "";
 };
@@ -165,8 +165,8 @@ function printPrompts(){
     printCustom();
 }
 
-function printContador(){
-    let texto = `Prompt: ${usage.prompt_tokens};  Completion: ${usage.completion_tokens}`;
+function printContador(datos){
+    let texto = `Prompt: ${datos.prompt};  Completion: ${datos.completion}`;
     W3.toast(texto,10000);
 }  
 
@@ -229,29 +229,36 @@ document.getElementById("preguntar").onclick = function(event){
     });
     W3.toast("Pensando",5000);
     Llms.sendMsg(llm,model,mensajes).then((respuesta) => {
-        usage.completion_tokens = respuesta.completion;
-        usage.prompt_tokens = respuesta.prompt;
-        printContador();
+        usage.completion += respuesta.completion;
+        usage.prompt += respuesta.prompt;
+        printContador(respuesta);
+        printContador(usage);
+        let tiempo = Date.now();
 
+        losMensajes.push({
+            "role":"user",
+            "content":pregunta,
+            "tiempo": tiempo
+        });
+        losMensajes.push({
+            "role":"assistant",
+            "content":respuesta.message,
+            "tiempo": tiempo
+        });
+        
         let div = document.createElement("div");
-        div.id = "ultima-pregunta";
+        div.id = "pregunta-"+tiempo;
         div.classList.add("w3-panel","w3-pale-blue","w3-leftbar","w3-rightbar","w3-border-green");
-        div.innerHTML = `<span id="borrar-pregunta" class="w3-button w3-display-topright">X</span><br>` + pregunta;
+        div.innerHTML = pregunta+`<br><br><span id="borrar-${tiempo}" class="w3-button">X</span>`;
         document.getElementById('respuestas').appendChild(div);
         
         div = document.createElement("div");
-        div.id = "ultima-respuesta" 
+        div.id = "respuesta-"+tiempo; 
         div.classList.add("w3-panel","w3-pale-blue","w3-leftbar","w3-rightbar","w3-border-blue");
         div.innerHTML = respuesta.message;
         document.getElementById('respuestas').appendChild(div);
-        losMensajes.push({
-            "role":"user",
-            "content":pregunta
-        })
-        losMensajes.push({
-            "role":"assistant",
-            "content":respuesta.message
-        });
+        
+        
         let elem = document.getElementById("pregunta");
         elem.value = "";
         elem.style.height = "auto";
@@ -273,13 +280,21 @@ document.getElementById('respuestas').onclick = function(event){
   while(target.id === ""){
       target = target.parentNode;
   }
-  if(target.id !== "borrar-pregunta"){
-      return;
+  if(!target.id.includes("borrar-"){
+    return;
   }
-  document.getElementById('ultima-pregunta').remove();
-  document.getElementById('ultima-respuesta').remove();
-  losMensajes.pop();
-  losMensajes.pop();
+  let tiempo = target.id.replace("borrar-","");
+  
+  document.getElementById('pregunta-'+tiempo).remove();
+  document.getElementById('respuesta-'+tiempo).remove();
+  let len = losMensajes.length;
+  for(let i=0;i<len;i++){
+    if(losMensajes[i].tiempo == tiempo){
+      losMensajes.splice(i,1);
+      i--;
+      len--;
+    }
+  }
 };
 
 window.onload = function(){
