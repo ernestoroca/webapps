@@ -280,7 +280,7 @@ document.getElementById('respuestas').onclick = function(event){
   while(target.id === ""){
       target = target.parentNode;
   }
-  if(!target.id.includes("borrar-"){
+  if(!target.id.includes("borrar-")){
     return;
   }
   let tiempo = target.id.replace("borrar-","");
