@@ -33,11 +33,7 @@
         <textarea class="w3-input w3-border w3-round" type="text" id="custom-system"></textarea>
       </p>
       <p>
-        <label>Pregunta</label><br>
-        <textarea class="w3-input w3-border w3-round" type="text" id="custom-user"></textarea>
-      </p>
-      <p>
-        <button class="w3-button w3-white w3-border w3-border-red w3-round-large" id="configurar">Configurar</button>
+        <button class="w3-button w3-white w3-border w3-border-red w3-round-large" id="configurar">Guardar</button>
       </p>
     </form>
   </div>
@@ -149,11 +145,11 @@ document.getElementById("llms").onchange = function(){
 document.getElementById("reset").onclick = function(event){
     event.preventDefault();
     losMensajes = [];
+    usage = {
+      completion_tokens: 0,
+      prompt_tokens: 0
+    };
     document.getElementById('respuestas').innerHTML = "";
-    let elem = document.getElementById("pregunta");
-    elem.value = document.getElementById("custom-user").value;
-    elem.style.height = "auto";
-    elem.style.height = `${elem.scrollHeight}px`;
 };
 
 function printPrompts(){
@@ -179,20 +175,11 @@ function printCustom(){
     if(val === "new"){
         document.getElementById("label").value = "";
         document.getElementById("custom-system").value = "";
-        document.getElementById("custom-user").value = "";
     } else if (val !== ""){
         let unPrompt = Prompts.read(val);
         document.getElementById("label").value = unPrompt.label;
         document.getElementById("custom-system").value = unPrompt.system;
-        document.getElementById("custom-user").value = unPrompt.user;
-        document.getElementById("pregunta").value = unPrompt.user;
     }
-    losMensajes = [];
-    document.getElementById('respuestas').innerHTML = "";
-    usage = {
-      completion_tokens: 0,
-      prompt_tokens: 0
-    };
 }
 
 document.getElementById("prompts").onchange = printCustom;
@@ -201,17 +188,15 @@ document.getElementById("configurar").onclick = function(event){
     event.preventDefault();
     let label = document.getElementById("label").value;
     let customSys = document.getElementById("custom-system").value;
-    let customUsr = document.getElementById("custom-user").value;
     let promptid = document.getElementById("prompts").value;
     if(promptid === "new"){
-        Prompts.create(label,customSys,customUsr);
+        Prompts.create(label,customSys,"");
     } else {
-        Prompts.update(promptid,label,customSys,customUsr);
+        Prompts.update(promptid,label,customSys,"");
     }
     printPrompts();
     document.getElementById("label").value = "";
     document.getElementById("custom-system").value = "";
-    document.getElementById("custom-user").value = "";
     document.getElementById("prompts").value = "new";
 }
 
@@ -242,12 +227,20 @@ document.getElementById("preguntar").onclick = function(event){
       "role":"user",
       "content":pregunta
     });
-    W3.toast("Sent",5000);
+    W3.toast("Pensando",5000);
     Llms.sendMsg(llm,model,mensajes).then((respuesta) => {
         usage.completion_tokens = respuesta.completion;
         usage.prompt_tokens = respuesta.prompt;
         printContador();
+
         let div = document.createElement("div");
+        div.id = "ultima-pregunta";
+        div.classList.add("w3-panel","w3-pale-blue","w3-leftbar","w3-rightbar","w3-border-green");
+        div.innerHTML = `<span id="borrar-pregunta" class="w3-button w3-display-topright">X</span><br>` + pregunta;
+        document.getElementById('respuestas').appendChild(div);
+        
+        div = document.createElement("div");
+        div.id = "ultima-respuesta" 
         div.classList.add("w3-panel","w3-pale-blue","w3-leftbar","w3-rightbar","w3-border-blue");
         div.innerHTML = respuesta.message;
         document.getElementById('respuestas').appendChild(div);
@@ -260,7 +253,7 @@ document.getElementById("preguntar").onclick = function(event){
             "content":respuesta.message
         });
         let elem = document.getElementById("pregunta");
-        elem.value = document.getElementById("custom-user").value;
+        elem.value = "";
         elem.style.height = "auto";
         elem.style.height = `${elem.scrollHeight}px`;
     }).catch((error) => {
@@ -274,12 +267,26 @@ document.getElementById("config-click").onclick = function(){
     x.style.display = (x.style.display === "none") ? "block" : "none";
 };
 
+document.getElementById('respuestas').onclick = function(event){
+  event.preventDefault();
+  let target = event.target;
+  while(target.id === ""){
+      target = target.parentNode;
+  }
+  if(target.id !== "borrar-pregunta"){
+      return;
+  }
+  document.getElementById('ultima-pregunta').remove();
+  document.getElementById('ultima-respuesta').remove();
+  losMensajes.pop();
+  losMensajes.pop();
+};
+
 window.onload = function(){
     formKey();
     Llms.init().then(printLms);
     printPrompts();
     W3.textarea("custom-system");
-    W3.textarea("custom-user");
     W3.textarea("pregunta");
 };
 
