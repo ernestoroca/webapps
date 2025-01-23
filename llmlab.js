@@ -257,7 +257,7 @@ var Prompts = (function(){
             let str = JSON.stringify(obj);
             let id,x;
             do {
-                id = makeid(16);
+                id = Tools.makeid(16);
                 x = localStorage.getItem("Prompt-"+id);
             } while(x);
             localStorage.setItem("Prompt-"+id,str);
@@ -310,7 +310,7 @@ var Agents = (function(){
             let str = JSON.stringify(obj);
             let id,x;
             do {
-                id = makeid(16);
+                id = Tools.makeid(16);
                 x = localStorage.getItem("Agent-"+id);
             } while(x);
             localStorage.setItem("Agent-"+id,str);
@@ -365,7 +365,7 @@ var Tasks = (function(){
             let str = JSON.stringify(obj);
             let id,x;
             do {
-                id = makeid(16);
+                id = Tools.makeid(16);
                 x = localStorage.getItem("Task-"+id);
             } while(x);
             localStorage.setItem("Task-"+id,str);
@@ -418,7 +418,7 @@ var Results = (function(){
             let str = JSON.stringify(obj);
             let id,x;
             do {
-                id = makeid(16);
+                id = Tools.makeid(16);
                 x = localStorage.getItem("Result-"+id);
             } while(x);
             localStorage.setItem("Result-"+id,str);
@@ -538,7 +538,7 @@ var Process = (function(){
             let str = JSON.stringify(obj);
             let id,x;
             do {
-                id = makeid(16);
+                id = Tools.makeid(16);
                 x = localStorage.getItem("Process-"+id);
             } while(x);
             localStorage.setItem("Process-"+id,str);
