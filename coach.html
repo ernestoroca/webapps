@@ -102,6 +102,7 @@ var usage = {
   costos: 0,
   pricing_completion: 0,
   pricing_prompt: 0,
+  contador: 0,
 };
 
 function recuperarCharla(){
@@ -156,22 +157,20 @@ function imprimirAnterior(){
     document.getElementById('respuestas').appendChild(div);
 }  
 function hacerResumen(){
-    let len = losMensajes.length;
-    if(len<=40){
-        return Promise.resolve("");
-    }
-    
-    let vecMensajes = losMensajes.slice(0,12);
-    vecMensajes.push({
+    losMensajes.push({
       "role":"user",
       "content":"Haz un resumen de la conversación de tal manera que puedas hacer un seguimiento."
     });
-    Llms.sendMsg(llm,model,vecMensajes).then((respuesta) => {
+    return Llms.sendMsg(llm,model,losMensajes).then((respuesta) => {
         usage.completion += respuesta.completion;
         usage.prompt += respuesta.prompt;
         printContador(respuesta);
         printContador(usage);
-        return Promise.resolve(respuesta.message); 
+        losMensajes.push({
+           "role":"assistant",
+           "content":respuesta.message
+        });
+        return Promise.resolve(); 
     });
 }
 function formKey(){
@@ -280,6 +279,7 @@ document.getElementById("preguntar").onclick = function(event){
     Llms.sendMsg(llm,model,losMensajes).then((respuesta) => {
         usage.completion += respuesta.completion;
         usage.prompt += respuesta.prompt;
+        usage.contador++;
         printContador(respuesta);
         printContador(usage);
         losMensajes.push({
@@ -301,6 +301,11 @@ document.getElementById("preguntar").onclick = function(event){
         elem.value = "";
         elem.style.height = "auto";
         elem.style.height = `${elem.scrollHeight}px`;
+        if(usage.contador >= 20){
+          hacerResumen().then(()=>{
+            usage.contador = 0;
+          });
+        }
     }).catch((error) => {
         console.log(error);
         W3.toast(error,5000);
@@ -309,16 +314,8 @@ document.getElementById("preguntar").onclick = function(event){
 
 document.getElementById("guardar").onclick = function(event){
     hacerResumen().then((res)=>{
-        if(res !== ""){
-            losMensajes.splice(1,10,{
-              "role":"assistant",
-              "content":res
-            });
-            losMensajes.splice(1,0,{
-              "role":"user",
-              "content":"Escribe el resumen de lo conversado hasta este momento."
-            });
-        }
+        
+        
         borrarCharla();
         guardarCharla();
     });
