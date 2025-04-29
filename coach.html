@@ -138,6 +138,22 @@ function guardarCharla(){
   }
 }
 
+function imprimirAnterior(){
+    let len = losMensajes.length;
+    if(len <3) {
+        return;
+    }
+
+    let div = document.createElement("div");
+    div.classList.add("w3-panel","w3-pale-blue","w3-leftbar","w3-rightbar","w3-border-green");
+    div.innerHTML = losMensajes[len-2].content;
+    document.getElementById('respuestas').appendChild(div);
+        
+    div = document.createElement("div");
+    div.classList.add("w3-panel","w3-pale-blue","w3-leftbar","w3-rightbar","w3-border-blue");
+    div.innerHTML = losMensajes[len-1].content;
+    document.getElementById('respuestas').appendChild(div);
+}  
 function hacerResumen(){
     let len = losMensajes.length;
     if(len<=40){
@@ -310,6 +326,7 @@ document.getElementById("guardar").onclick = function(event){
 window.onload = function(){
     formKey();
     recuperarCharla();
+    imprimirAnterior();
     Llms.init().then(printLms);
     W3.textarea("pregunta");
 };
