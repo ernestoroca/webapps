@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Llm Chat</title>
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <script src="llmlab.js"></script>
+  <script src="common.js"></script>
+</head>
+<body>
+<div class="w3-container">
+  <div class="w3-card-4">
+    <div class="w3-container w3-green" id="config-click">
+      <h2>Chat Config</h2>
+    </div>
+    <form class="w3-container" id="config-show">
+      <p>
+       <label><b>Llm</b></label>
+       <select class="w3-select" id="llms"></select>
+      </p>
+      <p>
+        <label><b>Modelo</b></label>
+        <select class="w3-select" id="modelos"></select><br>
+        <span id="precios"></span>
+      </p>
+      <p>
+        <button class="w3-button w3-white w3-border w3-border-red w3-round-large" id="configurar">Guardar</button>
+      </p>
+    </form>
+  </div>
+</div>
+<div class="w3-container" id="respuestas"></div>    
+<div class="w3-container">
+  <div class="w3-card-4">
+    <div class="w3-container w3-green">
+      <h2>Pregunta</h2>
+    </div>
+    <form class="w3-container">
+      <p>
+        <textarea class="w3-input w3-border w3-round" type="text" id="pregunta"></textarea>
+      </p>
+      <p>
+        <button class="w3-button w3-white w3-border w3-border-red w3-round-large" id="preguntar">Enviar</button>
+        <button class="w3-button w3-white w3-border w3-border-red w3-round-large" id="reset">Reset</button>
+        <span id="contador"></span>
+      </p>
+    </form>
+  </div>
+</div>
+<script>
+
+let losMensajes = [];
+mensajes.push({
+      "role":"system",
+      "content":`
+Propósito y Objetivos:
+* Guiar a profesionales en gestión de proyectos en la comprensión e implementación de metodologías ágiles.
+* Ayudar a los usuarios a organizarse y tomar decisiones informadas dentro de un marco ágil.
+* Facilitar la identificación clara de la situación actual y los pasos a seguir mediante preguntas estratégicas y análisis de las respuestas.
+
+Cualidades:
+* Eres curioso y haces preguntas con el fin de ampliar la información que te permita enteder la situación.
+* Eres creativo al momento de elegir qué pregunta hacer y dar sugerencias.
+* Utilizas la información previa para determinar una tendencia y un seguimiento lo que va suecediendo a lo largo del tiempo.
+
+Comportamientos y Reglas:
+1) Inicio de la Interacción:
+a) Comenzar preguntando al usuario qué tipo de reunión desea llevar a cabo.
+b) Las opciones de reunión incluyen: análisis del día anterior, análisis de la semana anterior, planificación del día y planificación de la semana que viene.
+c) Mantener un estilo de conversación conciso y directo, con un máximo de 3 oraciones por turno de diálogo.
+
+2) Proceso de Indagación y Análisis:
+a) Realizar preguntas puntuales y relevantes para la situación planteada por el usuario.
+b) Escuchar atentamente las respuestas proporcionadas, analizándolas para comprender la situación en profundidad.
+c) Determinar la siguiente pregunta a realizar basándose en el análisis de las respuestas anteriores, con el objetivo de obtener una comprensión clara del contexto y los objetivos.
+d) Continuar el ciclo de preguntas y análisis hasta tener una visión completa de la situación y las acciones necesarias.
+
+3) Guía y Facilitación:
+a) Ofrecer orientación basada en principios y prácticas ágiles.
+b) Facilitar la toma de decisiones informadas por parte del usuario, sin imponer soluciones directas.
+c) Promover la reflexión y el aprendizaje a través del proceso de diálogo.
+d) Asegurarse de que el usuario sea el principal actor en la identificación de soluciones y la toma de decisiones.
+
+4) Sugerencia final
+a) Ofrece una sugerencia de las acciones que podría tomar la persona.
+b) 
+
+Tono General:
+* Mantener un tono profesional, experto y de guía.
+* Ser conciso, directo y enfocado en obtener claridad.
+* Mostrar paciencia y disposición para explorar la situación a través de preguntas.
+* Evitar la jerga innecesaria y comunicarse de manera clara y accesible.
+  `;
+});
+
+var usage = {
+  completion: 0,
+  prompt: 0
+};
+
+function recuperarCharla(){
+  let len = localStorage.length;
+  for(let i=0;i<len;i++){
+    let llave = localStorage.key();
+    if(llave.indexOf("Agile-")===0){
+      let valorStr = localStorage.getItem(llave);
+      let valor = JSON.parse(valorStr);
+      losMensajes.push(valor);
+    }
+  }
+}
+
+function borrarCharla(){
+  let len = localStorage.length;
+  for(let i=0;i<len;i++){
+    let llave = localStorage.key();
+    if(llave.indexOf("Agile-")===0){
+      localStorage.removeItem(llave);
+    }
+  }
+}
+  
+function guardarCharla(){
+  let len = losMensajes.length;
+  for(let i=1<len;i++){
+    let valorStr = JSON.stringify(losMensajes[i]);
+    localStorage.setItem("Agile-"+i,valorStr);
+  }
+}
+  
+function formKey(){
+    let keyX = Llms.getKey();
+    keyX = (keyX)?"****":"";
+    let strHTML = `
+    <form class="w3-container">
+      <p>
+        <label>OpenGateway Key</label>
+        <input class="w3-input" type="text" id="modal-key" value="${keyX}">
+      </p>
+      <p>
+        <button id="modal-guardar" class="w3-btn w3-green">Modificar</button>
+        <button id="modal-borrar" class="w3-btn w3-red">Borrar</button>
+      </p>
+    </form>
+    `;
+    W3.modal(strHTML);
+    document.getElementById("modal-guardar").onclick = function(){
+        let key = document.getElementById("modal-key").value;
+        if(key === ""){
+            return;
+        }
+        Llms.setKey(key);
+    };
+    document.getElementById("modal-borrar").onclick = function(){
+        Llms.delKey();
+    };
+}
+
+function printModelos(){
+    let llm = document.getElementById("llms").value;
+    let lista = Llms.getModels(llm);
+    let len = lista.length;
+    let options = "";
+    for(let i=0;i<len;i++){
+        options += `<option value="${lista[i]}">${lista[i]}</option>`;
+    }
+    document.getElementById("modelos").innerHTML = options;
+    modelData();
+}
+
+function modelData(){
+    let llm = document.getElementById("llms").value;
+    let model = document.getElementById("modelos").value;
+    let data = Llms.getData(llm,model);
+    let pricing = data.pricing;
+    
+    //millon de tokens por 1 dolar
+    let valor = 1/(parseFloat(pricing.prompt)*1000000);
+    let str = "" + valor.toFixed(3) +" / ";
+    valor = 1/(parseFloat(pricing.completion)*1000000);
+    str += valor.toFixed(3);
+    
+    //dolares por página
+    valor = parseFloat(pricing.prompt)*1154;
+    str += "   ; " + valor.toFixed(3);
+    valor = parseFloat(pricing.completion)*1154;
+    str += " / " + valor.toFixed(3);
+    document.getElementById("precios").innerHTML = str;
+}
+document.getElementById("modelos").onchange = modelData;
+
+function printLms(){
+    let lista = Llms.getLlms();
+    let len = lista.length;
+    let options = "";
+    for(let i=0;i<len;i++){
+        options += `<option value="${lista[i]}">${lista[i]}</option>`;
+    }
+    document.getElementById("llms").innerHTML = options;
+    document.getElementById("llms").value = "google";
+    printModelos();
+    document.getElementById("modelos").value = "gemma-2-9b-it:free";
+    modelData();
+}
+
+document.getElementById("llms").onchange = function(){
+    printModelos();
+};
+
+function printContador(datos){
+    let texto = `Prompt: ${datos.prompt};  Completion: ${datos.completion}`;
+    W3.toast(texto,10000);
+}
+
+document.getElementById("preguntar").onclick = function(event){
+    event.preventDefault();
+    let pregunta = document.getElementById("pregunta").value;
+    if(pregunta === ""){
+        W3.toast("Falta pregunta",3000);
+        return;
+    }
+    let llm = document.getElementById("llms").value;
+    let model = document.getElementById("modelos").value;
+    let len = losMensajes.length;
+    losMensajes.push({
+      "role":"user",
+      "content":pregunta
+    });
+    W3.toast("Pensando",5000);
+    Llms.sendMsg(llm,model,losMensajes).then((respuesta) => {
+        usage.completion += respuesta.completion;
+        usage.prompt += respuesta.prompt;
+        printContador(respuesta);
+        printContador(usage);
+        losMensajes.push({
+            "role":"assistant",
+            "content":respuesta.message,
+        });
+        
+        let div = document.createElement("div");
+        div.classList.add("w3-panel","w3-pale-blue","w3-leftbar","w3-rightbar","w3-border-green");
+        div.innerHTML = pregunta;
+        document.getElementById('respuestas').appendChild(div);
+        
+        div = document.createElement("div");
+        div.classList.add("w3-panel","w3-pale-blue","w3-leftbar","w3-rightbar","w3-border-blue");
+        div.innerHTML = respuesta.message;
+        document.getElementById('respuestas').appendChild(div);
+        
+        let elem = document.getElementById("pregunta");
+        elem.value = "";
+        elem.style.height = "auto";
+        elem.style.height = `${elem.scrollHeight}px`;
+    }).catch((error) => {
+        console.log(error);
+        W3.toast(error,5000);
+    });
+};
+
+document.getElementById("config-click").onclick = function(){
+    let x = document.getElementById("config-show");
+    x.style.display = (x.style.display === "none") ? "block" : "none";
+};
+
+document.getElementById('respuestas').onclick = function(event){
+  event.preventDefault();
+  let target = event.target;
+  while(target.id === ""){
+      target = target.parentNode;
+  }
+  if(!target.id.includes("borrar-")){
+    return;
+  }
+  let tiempo = target.id.replace("borrar-","");
+  
+  document.getElementById('pregunta-'+tiempo).remove();
+  document.getElementById('respuesta-'+tiempo).remove();
+  let len = losMensajes.length;
+  for(let i=0;i<len;i++){
+    if(losMensajes[i].tiempo == tiempo){
+      losMensajes.splice(i,1);
+      i--;
+      len--;
+    }
+  }
+};
+
+window.onload = function(){
+    formKey();
+    recuperarCharla();
+    Llms.init().then(printLms);
+    W3.textarea("pregunta");
+};
+
+</script>
+</body>
+</html>
