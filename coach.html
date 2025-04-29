@@ -202,7 +202,7 @@ function modelData(){
     let data = Llms.getData(llm,model);
     let pricing = data.pricing;
 
-    usage.princing = pricing;
+    usage.pricing = pricing;
     
     //millon de tokens por 1 dolar
     let valor = 1/(parseFloat(pricing.prompt)*1000000);
