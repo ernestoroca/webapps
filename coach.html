@@ -41,8 +41,10 @@
       </p>
       <p>
         <button class="w3-button w3-white w3-border w3-border-red w3-round-large" id="preguntar">Enviar</button>
-        <button class="w3-button w3-white w3-border w3-border-red w3-round-large" id="reset">Reset</button>
         <span id="contador"></span>
+      </p>
+      <p>
+        <button class="w3-button w3-white w3-border w3-border-red w3-round-large" id="guardar">Guardar</button>
       </p>
     </form>
   </div>
@@ -50,7 +52,7 @@
 <script>
 
 let losMensajes = [];
-mensajes.push({
+losMensajes.push({
       "role":"system",
       "content":`
 Propósito y Objetivos:
@@ -127,7 +129,31 @@ function guardarCharla(){
     localStorage.setItem("Agile-"+i,valorStr);
   }
 }
-  
+
+function hacerResumen(){
+    let len = losMensajes.length;
+    if(len<=40){
+        return Promise.resolve();
+    }
+    
+    let vecMensajes = losMensajes.slice(0,12);
+    vecMensajes.push({
+      "role":"user",
+      "content":"Haz un resumen de la conversación de tal manera que se permita hacer un seguimiento."
+    });
+    Llms.sendMsg(llm,model,vecMensajes).then((respuesta) => {
+        usage.completion += respuesta.completion;
+        usage.prompt += respuesta.prompt;
+        printContador(respuesta);
+        printContador(usage);
+        losMensajes.push({
+            "role":"assistant",
+            "content":respuesta.message,
+        });
+        losMensajes.splice(1,10);
+        return Promise.resolve(); 
+    });
+}
 function formKey(){
     let keyX = Llms.getKey();
     keyX = (keyX)?"****":"";
@@ -221,7 +247,6 @@ document.getElementById("preguntar").onclick = function(event){
     }
     let llm = document.getElementById("llms").value;
     let model = document.getElementById("modelos").value;
-    let len = losMensajes.length;
     losMensajes.push({
       "role":"user",
       "content":pregunta
@@ -257,32 +282,11 @@ document.getElementById("preguntar").onclick = function(event){
     });
 };
 
-document.getElementById("config-click").onclick = function(){
-    let x = document.getElementById("config-show");
-    x.style.display = (x.style.display === "none") ? "block" : "none";
-};
-
-document.getElementById('respuestas').onclick = function(event){
-  event.preventDefault();
-  let target = event.target;
-  while(target.id === ""){
-      target = target.parentNode;
-  }
-  if(!target.id.includes("borrar-")){
-    return;
-  }
-  let tiempo = target.id.replace("borrar-","");
-  
-  document.getElementById('pregunta-'+tiempo).remove();
-  document.getElementById('respuesta-'+tiempo).remove();
-  let len = losMensajes.length;
-  for(let i=0;i<len;i++){
-    if(losMensajes[i].tiempo == tiempo){
-      losMensajes.splice(i,1);
-      i--;
-      len--;
-    }
-  }
+document.getElementById("guardar").onclick = function(event){
+    hacerResumen().then(()=>{
+        borrarCharla();
+        guardarCharla();
+    });
 };
 
 window.onload = function(){
