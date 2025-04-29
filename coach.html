@@ -107,7 +107,7 @@ function recuperarCharla(){
   let len = localStorage.length;
   for(let i=0;i<len;i++){
     let llave = localStorage.key(i);
-    if(llave.indexOf("Agile-")===0){
+    if(llave.indexOf("AgileCoach-")===0){
       let valorStr = localStorage.getItem(llave);
       let valor = JSON.parse(valorStr);
       losMensajes.push(valor);
@@ -119,7 +119,7 @@ function borrarCharla(){
   let len = localStorage.length;
   for(let i=0;i<len;i++){
     let llave = localStorage.key(i);
-    if(llave.indexOf("Agile-")===0){
+    if(llave.indexOf("AgileCoach-")===0){
       localStorage.removeItem(llave);
     }
   }
@@ -129,32 +129,27 @@ function guardarCharla(){
   let len = losMensajes.length;
   for(let i=1;i<len;i++){
     let valorStr = JSON.stringify(losMensajes[i]);
-    localStorage.setItem("Agile-"+i,valorStr);
+    localStorage.setItem("AgileCoach-"+i,valorStr);
   }
 }
 
 function hacerResumen(){
     let len = losMensajes.length;
     if(len<=40){
-        return Promise.resolve();
+        return Promise.resolve("");
     }
     
     let vecMensajes = losMensajes.slice(0,12);
     vecMensajes.push({
       "role":"user",
-      "content":"Haz un resumen de la conversación de tal manera que se permita hacer un seguimiento."
+      "content":"Haz un resumen de la conversación de tal manera que puedas hacer un seguimiento."
     });
     Llms.sendMsg(llm,model,vecMensajes).then((respuesta) => {
         usage.completion += respuesta.completion;
         usage.prompt += respuesta.prompt;
         printContador(respuesta);
         printContador(usage);
-        losMensajes.push({
-            "role":"assistant",
-            "content":respuesta.message,
-        });
-        losMensajes.splice(1,10);
-        return Promise.resolve(); 
+        return Promise.resolve(respuesta.message); 
     });
 }
 function formKey(){
@@ -291,7 +286,17 @@ document.getElementById("preguntar").onclick = function(event){
 };
 
 document.getElementById("guardar").onclick = function(event){
-    hacerResumen().then(()=>{
+    hacerResumen().then((res)=>{
+        if(res !== ""){
+            losMensajes.splice(1,10,{
+              "role":"assistant",
+              "content":res
+            });
+            losMensajes.splice(1,0,{
+              "role":"user",
+              "content":"Escribe el resumen de lo conversado hasta este momento."
+            });
+        }
         borrarCharla();
         guardarCharla();
     });
