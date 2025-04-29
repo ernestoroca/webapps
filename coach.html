@@ -124,7 +124,7 @@ function borrarCharla(){
   
 function guardarCharla(){
   let len = losMensajes.length;
-  for(let i=1<len;i++){
+  for(let i=1;i<len;i++){
     let valorStr = JSON.stringify(losMensajes[i]);
     localStorage.setItem("Agile-"+i,valorStr);
   }
