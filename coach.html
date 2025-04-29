@@ -99,8 +99,8 @@ var usage = {
   completion: 0,
   prompt: 0,
   costos: 0,
-  price_completion: 0,
-  price_prompt: 0,
+  pricing_completion: 0,
+  pricing_prompt: 0,
 };
 
 function recuperarCharla(){
@@ -198,8 +198,8 @@ function modelData(){
     let data = Llms.getData(llm,model);
     let pricing = data.pricing;
 
-    usage.price_completion = parseFloat(pricing.completion);
-    usage.price_prompt = parseFloat(pricing.prompt);
+    usage.pricing_completion = parseFloat(pricing.completion);
+    usage.pricing_prompt = parseFloat(pricing.prompt);
     
     //millon de tokens por 1 dolar
     let valor = 1/(parseFloat(pricing.prompt)*1000000);
@@ -235,8 +235,8 @@ document.getElementById("llms").onchange = function(){
 };
 
 function printContador(datos){
-    let precio = datos.prompt*usage.pricing.prompt;
-    precio += datos.completion*usage.pricing.completion;
+    let precio = datos.prompt*usage.pricing_prompt;
+    precio += datos.completion*usage.pricing_completion;
     let texto = `Prompt: ${datos.prompt};  Completion: ${datos.completion}; Pricing: ${precio}`;
     W3.toast(texto,10000);
 }
