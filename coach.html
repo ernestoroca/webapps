@@ -97,7 +97,9 @@ Tono General:
 
 var usage = {
   completion: 0,
-  prompt: 0
+  prompt: 0,
+  costos: 0,
+  pricing: null
 };
 
 function recuperarCharla(){
@@ -199,6 +201,8 @@ function modelData(){
     let model = document.getElementById("modelos").value;
     let data = Llms.getData(llm,model);
     let pricing = data.pricing;
+
+    usage.princing = pricing;
     
     //millon de tokens por 1 dolar
     let valor = 1/(parseFloat(pricing.prompt)*1000000);
@@ -234,7 +238,9 @@ document.getElementById("llms").onchange = function(){
 };
 
 function printContador(datos){
-    let texto = `Prompt: ${datos.prompt};  Completion: ${datos.completion}`;
+    let precio = datos.prompt*usage.pricing.prompt;
+    precio += datos.completion*usage.pricing.completion;
+    let texto = `Prompt: ${datos.prompt};  Completion: ${datos.completion}; Pricing: ${precio}`;
     W3.toast(texto,10000);
 }
 
