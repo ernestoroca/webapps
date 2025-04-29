@@ -113,6 +113,9 @@ function recuperarCharla(){
       losMensajes.push(valor);
     }
   }
+  losMensajes.sort(function(a,b){
+    return (a.pos > b.pos)?+1:-1;
+  });
 }
 
 function borrarCharla(){
@@ -128,7 +131,9 @@ function borrarCharla(){
 function guardarCharla(){
   let len = losMensajes.length;
   for(let i=1;i<len;i++){
-    let valorStr = JSON.stringify(losMensajes[i]);
+    let item = losMensajes[i];
+    item.pos = i;
+    let valorStr = JSON.stringify(item);
     localStorage.setItem("AgileCoach-"+i,valorStr);
   }
 }
