@@ -117,7 +117,7 @@ function recuperarCharla(){
 function borrarCharla(){
   let len = localStorage.length;
   for(let i=0;i<len;i++){
-    let llave = localStorage.key();
+    let llave = localStorage.key(i);
     if(llave.indexOf("Agile-")===0){
       localStorage.removeItem(llave);
     }
