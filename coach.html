@@ -309,7 +309,7 @@ document.getElementById("preguntar").onclick = function(event){
         printContador(respuesta);
         printContador(usage);
 
-        localStorage.setItem("AgileCoach-"+obj.tmp,JSON.stringify(objPregunta));
+        localStorage.setItem("AgileCoach-"+objPregunta.tmp,JSON.stringify(objPregunta));
         usage.contador++;
 
         let objRespuesta = {
@@ -318,7 +318,7 @@ document.getElementById("preguntar").onclick = function(event){
           "tmp": Date.now()
         };
         losMensajes.push(objRespuesta);
-        localStorage.setItem("AgileCoach-"+obj.tmp,JSON.stringify(objRespuesta));
+        localStorage.setItem("AgileCoach-"+objRespuesta.tmp,JSON.stringify(objRespuesta));
         usage.contador++;
 
         let div = document.createElement("div");
