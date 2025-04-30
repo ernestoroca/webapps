@@ -360,7 +360,7 @@ var Agents = (function(){
   };
 }());
 
-var Conversation = (function(){
+var Conversations = (function(){
   const MAX = 200;
   const DELTA = 20;
   let conversation;
@@ -403,14 +403,18 @@ var Conversation = (function(){
         }
       }
     },
-    list: function(){
+    list: function(agentId){
       let len = localStorage.length;
       let res = [];
       for(let i=0;i<len;i++){
         let key = localStorage.key(i);
         if(key.includes("Conversation-")){
-          key = key.replace("Conversation-","");
-          res.push(key);
+          let objStr = localStorage.getItem(key);
+          let obj = JSON.parse(objStr);
+          if(obj.agent === agentId){
+            key = key.replace("Conversation-","");
+            res.push(key);   
+          }
         }
       }
       return res;
