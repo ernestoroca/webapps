@@ -298,58 +298,208 @@ var Prompts = (function(){
 }());
 
 var Agents = (function(){
-    return {
-        create: function(role,goal,backstory,llm,model){
-            let obj = {
-                role:role,
-                goal:goal,
-                backstory:backstory,
-                llm:llm,
-                model:model
-            };
-            let str = JSON.stringify(obj);
-            let id,x;
-            do {
-                id = Tools.makeid(16);
-                x = localStorage.getItem("Agent-"+id);
-            } while(x);
-            localStorage.setItem("Agent-"+id,str);
-        },
-        read: function(id){
-            let str = localStorage.getItem("Agent-"+id);
-            if(!str){
-                return null;
-            }
-            let obj = JSON.parse(str);
-            return obj;
-        },
-        update: function(id,role,goal,backstory,llm,model){
-            let obj = {
-                role:role,
-                goal:goal,
-                backstory:backstory,
-                llm:llm,
-                model:model
-            };
-            let str = JSON.stringify(obj);
-            localStorage.setItem("Agent-"+id,str);
-        },
-        delete: function(id){
-            localStorage.removeItem("Agent-"+id);
-        },
-        list: function(){
-            let len = localStorage.length;
-            let res = [];
-            for(let i=0;i<len;i++){
-                let key = localStorage.key(i);
-                if(key.includes("Agent-")){
-                    key = key.replace("Agent-","");
-                    res.push(key);
-                }
-            }
-            return res;
-        },
-    };
+  return {
+    create: function(role,goal,backstory,process){
+      let obj = {
+        role:role,
+        goal:goal,
+        backstory:backstory,
+        process: process
+      };
+      let str = JSON.stringify(obj);
+      let id,x;
+      do {
+        id = Tools.makeid(16);
+        x = localStorage.getItem("Agent-"+id);
+      } while(x);
+      localStorage.setItem("Agent-"+id,str);
+    },
+    read: function(id){
+      let str = localStorage.getItem("Agent-"+id);
+      if(!str){
+        return null;
+      }
+      let obj = JSON.parse(str);
+      return obj;
+    },
+    update: function(id,role,goal,backstory,process){
+      let obj = {
+        role:role,
+        goal:goal,
+        backstory:backstory,
+        process: process
+      };
+      let str = JSON.stringify(obj);
+      localStorage.setItem("Agent-"+id,str);
+    },
+    delete: function(id){
+      localStorage.removeItem("Agent-"+id);
+
+      //remove the conversations with this agent
+      let keys = Conversation.list();
+      let len = keys.length;
+      for(let i=0;i<len;i++){
+        let oneConversation = Conversation.read(keys[i]);
+        if(oneConversation.agent === id){
+          Conversation.delete(keys[i]);
+        }
+      }
+    },
+    list: function(){
+      let len = localStorage.length;
+      let res = [];
+      for(let i=0;i<len;i++){
+        let key = localStorage.key(i);
+        if(key.includes("Agent-")){
+          key = key.replace("Agent-","");
+          res.push(key);
+        }
+      }
+      return res;
+    }
+  };
+}());
+
+var Conversation = (function(){
+  const MAX = 200;
+  const DELTA = 20;
+  let conversation;
+  let idConversation;
+  let system;
+  let last = 0;
+  let posFirst = -1;
+  return {
+    create: function(agentId,title){
+      let obj = {
+        agent:agentId,
+        title:title,
+      };
+      let str = JSON.stringify(obj);
+      let id,x;
+      do {
+        id = Tools.makeid(16);
+        x = localStorage.getItem("Conversation-"+id);
+      } while(x);
+      localStorage.setItem("Conversation-"+id,str);
+    },
+    read: function(id){
+      let str = localStorage.getItem("Conversation-"+id);
+      if(!str){
+        return null;
+      }
+      let obj = JSON.parse(str);
+      return obj;
+    },
+    delete: function(id){
+      localStorage.removeItem("Conversation-"+id);
+
+      //remove the messages from this conversation
+      let len = localStorage.length;
+      let llave = "Message."+id+"-";
+      for(let i=0;i<len;i++){
+        let key = localStorage.key(i);
+        if(key.includes(llave)){
+          localStorage.removeItem(key);
+        }
+      }
+    },
+    list: function(){
+      let len = localStorage.length;
+      let res = [];
+      for(let i=0;i<len;i++){
+        let key = localStorage.key(i);
+        if(key.includes("Conversation-")){
+          key = key.replace("Conversation-","");
+          res.push(key);
+        }
+      }
+      return res;
+    },
+    initChat: function(id){
+      conversation = [];
+      last = 0;
+      posFirst = -1;
+      let str = localStorage.getItem("Conversation-"+id);
+      if(!str){
+        idConversation = "";
+        system = "";
+        return false;
+      }
+      idConversation = id;
+      let obj = JSON.parse(str);
+      obj = Agents.read(obj.agent);
+
+      system = `
+        Your role is: ${obj.role}.
+        Your goal is: ${obj.goal}.
+        Your backstory is: ${obj.backstory}.
+        Your process is: ${obj.process}.
+      `;
+      let len = localStorage.length;
+      let llave = "Conversation."+id+"-";
+      for(let i=0;i<len;i++){
+        let key = localStorage.key(i);
+        if(key.includes(llave)){
+          let valueStr = localStorage.getItem(key);
+          let objMsg = JSON.parse(valueStr);
+          objMsg.tmp = parseInt(key.replace(llave,""));
+          conversation.push(objMsg);
+        }
+      }
+      conversation.sort((a,b)=>{(a.tmp>b.tmp)?+1:-1});
+    },
+    addChat: function(msg){
+      let tmp = Date.now();
+      if(tmp === last){
+        tmp++;
+      }
+      last = tmp;
+      localStorage.setItem("Conversation."+idConversation+"-"+last,JSON.stringify(msg));
+      msg.tmp = last;
+      conversation.push(msg);
+      return (conversation.length > MAX);
+    },
+    readChat: function(){
+      let len = conversation.length;
+      if(len<3){
+        return [];
+      }
+      let min = len - 20;
+      if(min < 1){
+        min = 1;
+      }
+      return conversation.slice(min,len);
+    },
+    readFirst(){
+      let len = conversation.length;
+      let i;
+      for(i=1;i<len;i++){
+        if(conversation[i].tmp>1e12){
+          break;
+        }
+      }
+      let vecMessages = [];
+      posFirst = i; 
+      for(let l=0;l<DELTA;l++){
+        vecMessages.push(conversation[i]);
+        i++;
+      }
+      return vecMessages;
+    },
+    setResume(msgQ,msgA){
+      if(posFirst < 0){
+        return;
+      }
+      localStorage.setItem("Conversation."+idConversation+"-"+posFirst,JSON.stringify(msgQ));
+      localStorage.setItem("Conversation."+idConversation+"-"+(posFirst+1),JSON.stringify(msgA));
+      msgQ.tmp = posFirst;
+      msgA.tmp = posFirst+1;
+      conversation.splice(posFirst,20);
+      conversation.splice(posFirst,0,msgQ);
+      conversation.splice(posFirst+1,0,msgA);
+      posFirst = -1;
+    }
+  }
 }());
 
 var Tasks = (function(){
