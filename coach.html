@@ -44,9 +44,6 @@
         <button class="w3-button w3-white w3-border w3-border-red w3-round-large" id="preguntar">Enviar</button>
         <span id="contador"></span>
       </p>
-      <p>
-        <button class="w3-button w3-white w3-border w3-border-red w3-round-large" id="guardar">Guardar</button>
-      </p>
     </form>
   </div>
 </div>
@@ -341,13 +338,6 @@ document.getElementById("preguntar").onclick = function(event){
     }).catch((error) => {
         console.log(error);
         W3.toast(error,5000);
-    });
-};
-
-document.getElementById("guardar").onclick = function(event){
-    hacerResumen().then((res)=>{
-        borrarCharla();
-        guardarCharla();
     });
 };
 
