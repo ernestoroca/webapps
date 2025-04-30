@@ -1,8 +1,9 @@
+
 <!DOCTYPE html>
 <html>
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Llm Chat</title>
+  <title>Agile Coach</title>
   <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
   <script src="llmlab.js"></script>
   <script src="common.js"></script>
@@ -51,10 +52,13 @@
 </div>
 <script>
 
+const MAX = 200;
+const DELTA = 20;
+
 let losMensajes = [];
 losMensajes.push({
-      "role":"system",
-      "content":`
+  "role":"system",
+  "content":`
 Propósito y Objetivos:
 * Guiar a profesionales en gestión de proyectos en la comprensión e implementación de metodologías ágiles.
 * Ayudar a los usuarios a organizarse y tomar decisiones informadas dentro de un marco ágil.
@@ -93,7 +97,7 @@ Tono General:
 * Mostrar paciencia y disposición para explorar la situación a través de preguntas.
 * Evitar la jerga innecesaria y comunicarse de manera clara y accesible.
   `,
-  "pos": 0
+  "tmp": 0
 });
 
 var usage = {
@@ -112,32 +116,15 @@ function recuperarCharla(){
     if(llave.indexOf("AgileCoach-")===0){
       let valorStr = localStorage.getItem(llave);
       let valor = JSON.parse(valorStr);
+      if(valor.tmp > 1e12){
+        usage.contador++;
+      }
       losMensajes.push(valor);
     }
   }
   losMensajes.sort(function(a,b){
-    return (a.pos > b.pos)?+1:-1;
+    return (a.tmp > b.tmp)?+1:-1;
   });
-}
-
-function borrarCharla(){
-  let len = localStorage.length;
-  for(let i=0;i<len;i++){
-    let llave = localStorage.key(i);
-    if(llave.indexOf("AgileCoach-")===0){
-      localStorage.removeItem(llave);
-    }
-  }
-}
-  
-function guardarCharla(){
-  let len = losMensajes.length;
-  for(let i=1;i<len;i++){
-    let item = losMensajes[i];
-    item.pos = i;
-    let valorStr = JSON.stringify(item);
-    localStorage.setItem("AgileCoach-"+i,valorStr);
-  }
 }
 
 function imprimirAnterior(){
@@ -156,23 +143,59 @@ function imprimirAnterior(){
     div.innerHTML = losMensajes[len-1].content;
     document.getElementById('respuestas').appendChild(div);
 }  
+
 function hacerResumen(){
-    losMensajes.push({
+    let vecMensajes = [];
+    vecMensajes.push(losMensajes[0]);
+
+    let len = losMensajes.length;
+    let i;
+    for(i=1;i<len;i++){
+      if(losMensajes[i].tmp>1e12){
+        break;
+      }
+    }
+    let ntmp = i; 
+    for(let l=0;l<DELTA;l++){
+      vecMensajes.push(losMensajes[i]);
+      i++;
+    }
+
+    let objPregunta = {
       "role":"user",
-      "content":"Haz un resumen de la conversación de tal manera que puedas hacer un seguimiento."
-    });
-    return Llms.sendMsg(llm,model,losMensajes).then((respuesta) => {
+      "content":"Haz un resumen de la conversación de tal manera que puedas hacer un seguimiento.",
+      "tmp": ntmp
+    };
+    vecMensajes.push(objPregunta);
+    let llm = document.getElementById("llms").value;
+    let model = document.getElementById("modelos").value;
+    return Llms.sendMsg(llm,model,vecMensajes).then((respuesta) => {
         usage.completion += respuesta.completion;
         usage.prompt += respuesta.prompt;
         printContador(respuesta);
         printContador(usage);
-        losMensajes.push({
-           "role":"assistant",
-           "content":respuesta.message
-        });
-        return Promise.resolve(); 
+
+        let objRespuesta = {
+          "role":"assistant",
+          "content":respuesta.message,
+          "tmp": ntmp+1
+        };
+
+        localStorage.setItem("AgileCoach-"+objPregunta.tmp,JSON.stringify(objPregunta));
+        localStorage.setItem("AgileCoach-"+objRespuesta.tmp,JSON.stringify(objRespuesta));
+        let i = ntmp;
+        for(let l=0;l<DELTA;l++){
+          item = losMensajes[i];
+          localStorage.removeItem("AgileCoach-"+item.tmp);
+          i++;
+        }
+        losMensajes.splice(ntmp,20);
+        losMensajes.splice(ntmp,0,objPregunta);
+        losMensajes.splice(ntmp+1,0,objRespuesta);
+        usage.contador -= DELTA;
     });
 }
+
 function formKey(){
     let keyX = Llms.getKey();
     keyX = (keyX)?"****":"";
@@ -235,7 +258,6 @@ function modelData(){
     str += " / " + valor.toFixed(3);
     document.getElementById("precios").innerHTML = str;
 }
-document.getElementById("modelos").onchange = modelData;
 
 function printLms(){
     let lista = Llms.getLlms();
@@ -250,6 +272,8 @@ function printLms(){
     document.getElementById("modelos").value = "gemma-2-9b-it:free";
     modelData();
 }
+
+document.getElementById("modelos").onchange = modelData;
 
 document.getElementById("llms").onchange = function(){
     printModelos();
@@ -271,22 +295,32 @@ document.getElementById("preguntar").onclick = function(event){
     }
     let llm = document.getElementById("llms").value;
     let model = document.getElementById("modelos").value;
-    losMensajes.push({
+    let objPregunta = {
       "role":"user",
-      "content":pregunta
-    });
+      "content":pregunta,
+      "tmp": Date.now()
+    };
+    losMensajes.push(objPregunta);
     W3.toast("Pensando",5000);
     Llms.sendMsg(llm,model,losMensajes).then((respuesta) => {
         usage.completion += respuesta.completion;
         usage.prompt += respuesta.prompt;
-        usage.contador++;
+
         printContador(respuesta);
         printContador(usage);
-        losMensajes.push({
-            "role":"assistant",
-            "content":respuesta.message,
-        });
-        
+
+        localStorage.setItem("AgileCoach-"+obj.tmp,JSON.stringify(objPregunta));
+        usage.contador++;
+
+        let objRespuesta = {
+          "role":"assistant",
+          "content":respuesta.message,
+          "tmp": Date.now()
+        };
+        losMensajes.push(objRespuesta);
+        localStorage.setItem("AgileCoach-"+obj.tmp,JSON.stringify(objRespuesta));
+        usage.contador++;
+
         let div = document.createElement("div");
         div.classList.add("w3-panel","w3-pale-blue","w3-leftbar","w3-rightbar","w3-border-green");
         div.innerHTML = pregunta;
@@ -301,10 +335,8 @@ document.getElementById("preguntar").onclick = function(event){
         elem.value = "";
         elem.style.height = "auto";
         elem.style.height = `${elem.scrollHeight}px`;
-        if(usage.contador >= 20){
-          hacerResumen().then(()=>{
-            usage.contador = 0;
-          });
+        if(usage.contador > MAX){
+          hacerResumen();
         }
     }).catch((error) => {
         console.log(error);
@@ -314,8 +346,6 @@ document.getElementById("preguntar").onclick = function(event){
 
 document.getElementById("guardar").onclick = function(event){
     hacerResumen().then((res)=>{
-        
-        
         borrarCharla();
         guardarCharla();
     });
