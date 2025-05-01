@@ -33,6 +33,7 @@
     </div>
   </div>
   <div class="w3-container" id="conversacion-elegida"></div>
+  <div class="w3-container" id="precio-elegido"></div>
   <div class="w3-container" id="respuestas"></div>    
   <div class="w3-container">
     <div class="w3-card-4">
@@ -351,7 +352,7 @@ function printLasCharlas(){
   let losDatos = Agents.read(elAgente);
   let strTitulo = losDatos.role;
   losDatos = Conversations.read(laConversacion);
-  strTitulo += " / "+ losDatos.titulo;
+  strTitulo += " / "+ losDatos.title;
   
   document.getElementById("conversacion-elegida").innerHTML = strTitulo;
   Conversations.initChat(laConversacion);
@@ -504,30 +505,7 @@ document.getElementById("model-list").onchange = function(){
     let pricing = data.pricing;
     usage.pricing_completion = parseFloat(pricing.completion);
     usage.pricing_prompt = parseFloat(pricing.prompt);
-}
-
-//--------------
-
-function modelOptions(){
-  let llm = document.getElementById("modal-llm").value;
-  let lista = Llms.getModels(llm);
-  let len = lista.length;
-  let options = "";
-  for(let i=0;i<len;i++){
-    options += `<option value="${lista[i]}">${lista[i]}</option>`;
-  }
-  document.getElementById("modal-model").innerHTML = options;
-}
-
-function modelData(){
-  let llm = document.getElementById("modal-llm").value;
-  let model = document.getElementById("modal-model").value;
-  let data = Llms.getData(llm,model);
-  let pricing = data.pricing;
-  let valor = 1/(parseFloat(pricing.prompt)*1000000);
-  document.getElementById("modal-prompt").innerHTML = valor.toFixed(3);
-  valor = 1/(parseFloat(pricing.completion)*1000000);
-  document.getElementById("modal-completion").innerHTML = valor.toFixed(3);
+    document.getElementById("precio-elegido").innerHTML = "" +(1e6*usage.pricing_prompt) "/"+(1e6*usage.pricing_completion);
 }
 
 //-----------
