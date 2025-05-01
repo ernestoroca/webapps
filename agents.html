@@ -120,7 +120,6 @@ function formAgente(){
 <div class="w3-modal-content">
 <div class="w3-container">
   <form class="w3-container">
-    <input class="w3-hide" type="text" id="modal-agente" value="${agenteid}">
     <p>
       <label>Role</label>
       <input class="w3-input" type="text" id="modal-role">
@@ -161,7 +160,6 @@ function formAgente(){
         modales = null;
         break;
       case "modal-guardar":
-        let agente = document.getElementById("modal-agente").value;
         let role = document.getElementById("modal-role").value;
         let goal = document.getElementById("modal-goal").value;
         let backstory = document.getElementById("modal-backstory").value;
@@ -260,7 +258,6 @@ function formConversacion(){
 <div class="w3-modal-content">
 <div class="w3-container">
   <form class="w3-container">
-    <input class="w3-hide" type="text" id="modal-conv" value="${convid}">
     <p>
       <label>Titulo</label>
       <input class="w3-input" type="text" id="modal-titulo">
@@ -289,7 +286,6 @@ function formConversacion(){
         modales = null;
         break;
       case "modal-guardar":
-        let conv = document.getElementById("modal-conv").value;
         let titulo = document.getElementById("modal-titulo").value;
         if(titulo === ""){
           return;
