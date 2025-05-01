@@ -79,6 +79,7 @@ function printLosAgentes(){
 <div class="w3-col s12 m6">
   <div class="w3-panel w3-card">
     <p>${elAgente.role}</p>
+    <button id="agent-select-${lista[i]}" class="w3-button w3-blue">Elegir</button>
     <button id="agent-edit-${lista[i]}" class="w3-button w3-green">Editar</button>
     <button id="agent-delete-${lista[i]}" class="w3-button w3-red">Borrar</button>
   </div>
@@ -94,18 +95,19 @@ function printLosAgentes(){
 </div>
         `;
     document.getElementById("agents-list").innerHTML = strHtml;
+    document.getElementById("respuestas").innerHTML = "";
+    document.getElementById("pregunta").innerHTML = "";
 }
 
-function printUnAgente(agenteid){
-  elAgente = agenteid;
-  let losDatos = Agents.read(agenteid);
+function printUnAgente(){
+  let losDatos = Agents.read(elAgente);
   document.getElementById("modal-role").value = losDatos.role;
   document.getElementById("modal-goal").value = losDatos.goal;
   document.getElementById("modal-backstory").value = losDatos.backstory;
   document.getElementById("modal-process").value = losDatos.process;
 }
 
-function formAgente(agenteid){
+function formAgente(){
   if(modales){
     modales.remove();
   }
@@ -169,7 +171,7 @@ function formAgente(agenteid){
         if(agente === "new"){
           Agents.create(role,goal,backstory,process);
         } else {
-          Agents.update(agente,role,goal,backstory,process);
+          Agents.update(elAgente,role,goal,backstory,process);
         }
         modales.remove();
         modales = null;
@@ -178,13 +180,9 @@ function formAgente(agenteid){
     }
   };
   
-  if(agenteid !== "new"){
-    printUnAgente(agenteid);
-  } else {
-    elAgente = null;
-  }
-  laConversacion = null;
-  printLasConversaciones();
+  if(elAgente !== "new"){
+    printUnAgente();
+  } 
 }
 
 document.getElementById("agents-list").onclick = function(evento){
@@ -195,21 +193,25 @@ document.getElementById("agents-list").onclick = function(evento){
     if(target.id === "agents-list"){
         return;
     }
-    let agenteId;
     if(target.id.includes("agent-edit-")){
-        agenteId = target.id.replace("agent-edit-","");
-        formAgente(agenteId);
+        elAgente = target.id.replace("agent-edit-","");
+        formAgente();
     } else if(target.id.includes("agent-delete-")){
-        agenteId = target.id.replace("agent-delete-","");
+        elAgente = target.id.replace("agent-delete-","");
         Agents.delete(agenteId);
         printLosAgentes();
+    } else if(target.id.includes("agent-select-")){
+        elAgente = target.id.replace("agent-select-","");
+        printLasConversaciones()
     }
 } 
 
 //-----------
 
 function printLasConversaciones(){
-  if(elAgente === null){
+  document.getElementById("respuestas").innerHTML = "";
+  document.getElementById("pregunta").innerHTML = "";
+  if(elAgente === null || elAgente === "new"){
     document.getElementById("convs-list").innerHTML = "";
     return;
   }
@@ -217,11 +219,12 @@ function printLasConversaciones(){
   let len = lista.length;
   let strHtml = "";
   for(let i=0;i<len;i++){
-    let laConversacion = Conversations.read(lista[i]);
+    let unaConversacion = Conversations.read(lista[i]);
     strHtml += `
 <div class="w3-col s12 m6">
   <div class="w3-panel w3-card">
-    <p>${laConversacion.title}</p>
+    <p>${unaConversacion.title}</p>
+    <button id="conv-select-${lista[i]}" class="w3-button w3-blue">Elegir</button>
     <button id="conv-edit-${lista[i]}" class="w3-button w3-green">Editar</button>
     <button id="conv-delete-${lista[i]}" class="w3-button w3-red">Borrar</button>
   </div>
@@ -239,13 +242,12 @@ function printLasConversaciones(){
   document.getElementById("convs-list").innerHTML = strHtml;
 }
 
-function printUnaConversacion(convid){
-  laConversacion = convid;
-  let losDatos = Conversations.read(convid);
+function printUnaConversacion(){
+  let losDatos = Conversations.read(laConversacion);
   document.getElementById("modal-titulo").value = losDatos.titulo; 
 }
 
-function formConversacion(convid){
+function formConversacion(){
   if(modales){
     modales.remove();
   }
@@ -291,10 +293,10 @@ function formConversacion(convid){
         if(titulo === ""){
           return;
         }
-        if(conv === "new"){
+        if(laConversacion === "new"){
           Conversations.create(elAgente,titulo);
         } else {
-          Conversations.update(conv,titulo);
+          Conversations.update(laConversacion,titulo);
         }
         modales.remove();
         modales = null;
@@ -303,12 +305,9 @@ function formConversacion(convid){
     }
   };
   
-  if(convid !== "new"){
-    printUnaConversacion(convid);
-  } else {
-    laConversacion = null;
+  if(laConversacion !== "new"){
+    printUnaConversacion();
   }
-  printLasCharlas();
 }
 
 document.getElementById("convs-list").onclick = function(evento){
@@ -321,12 +320,15 @@ document.getElementById("convs-list").onclick = function(evento){
   }
   let convId;
   if(target.id.includes("conv-edit-")){
-    convId = target.id.replace("conv-edit-","");
-    formConversacion(convId);
+    laConversacion = target.id.replace("conv-edit-","");
+    formConversacion();
   } else if(target.id.includes("conv-delete-")){
-    convId = target.id.replace("conv-delete-","");
-    Conversations.delete(convId);
+    laConversacion = target.id.replace("conv-delete-","");
+    Conversations.delete(laConversacion);
     printLasConversaciones();
+  } else if(target.id.includes("conv-select-")){
+    laConversacion = target.id.replace("conv-select-","");
+    printLasCharlas();
   }
 } 
 
@@ -489,25 +491,15 @@ document.getElementById("llm-list").onchange = function(){
 }
 
 document.getElementById("model-list").onchange = function(){
-  let llm = document.getElementById("llm-list").value;
-  let model = document.getElementById("model-list").value;
-  let data = Llms.getData(llm,model);
-  let pricing = data.pricing;
-  usage.pricing_completion = parseFloat(pricing.completion);
-  usage.pricing_prompt = parseFloat(pricing.prompt);
+    let llm = document.getElementById("llm-list").value;
+    let model = document.getElementById("model-list").value;
+    let data = Llms.getData(llm,model);
+    let pricing = data.pricing;
+    usage.pricing_completion = parseFloat(pricing.completion);
+    usage.pricing_prompt = parseFloat(pricing.prompt);
 }
 
-
-
-
-//==================================================
-
-
-
-
-
-
-//-----------
+//--------------
 
 
 
@@ -532,13 +524,6 @@ function modelData(){
   valor = 1/(parseFloat(pricing.completion)*1000000);
   document.getElementById("modal-completion").innerHTML = valor.toFixed(3);
 }
-
-
-
-
-
-
-
 
 //-----------
 
