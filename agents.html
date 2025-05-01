@@ -32,7 +32,7 @@
       </p>
     </div>
   </div>
-
+  <div class="w3-container" id="conversacion-elegida"></div>
   <div class="w3-container" id="respuestas"></div>    
   <div class="w3-container">
     <div class="w3-card-4">
@@ -342,11 +342,18 @@ function printContador(datos){
 }
 
 function printLasCharlas(){
+  document.getElementById("conversacion-elegida").innerHTML = "";
   document.getElementById("respuestas").innerHTML = "";
   document.getElementById("pregunta").innerHTML = "";
-  if(laConversacion === null){
+  if(laConversacion === null || laConversacion === "new"){
     return;
   }
+  let losDatos = Agents.read(elAgente);
+  let strTitulo = losDatos.role;
+  losDatos = Conversations.read(laConversacion);
+  strTitulo += " / "+ losDatos.titulo;
+  
+  document.getElementById("conversacion-elegida").innerHTML = strTitulo;
   Conversations.initChat(laConversacion);
   let vecMsg = Conversations.readChat();
   let len = vecMsg.length;
@@ -500,8 +507,6 @@ document.getElementById("model-list").onchange = function(){
 }
 
 //--------------
-
-
 
 function modelOptions(){
   let llm = document.getElementById("modal-llm").value;
