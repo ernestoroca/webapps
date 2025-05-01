@@ -167,7 +167,7 @@ function formAgente(){
         if(role === "" || goal === "" || backstory === "" || process === ""){
           return;
         }
-        if(agente === "new"){
+        if(elAgente === "new"){
           Agents.create(role,goal,backstory,process);
         } else {
           Agents.update(elAgente,role,goal,backstory,process);
