@@ -531,10 +531,8 @@ var Conversations = (function(){
       };
       conversation.push(objPregunta);
       return Llms.sendMsg(llm,model,conversation).then((respuesta) => {
-        respuesta = res;
         localStorage.setItem("Conversation."+idConversation+"-"+last,JSON.stringify(objPregunta));
         objPregunta.tmp = last;
-        
         
         let tmp = Date.now();
         if(tmp === last){
