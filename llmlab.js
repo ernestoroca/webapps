@@ -527,12 +527,16 @@ var Conversations = (function(){
       last = tmp;
       let objPregunta = {
           "role":"user",
-          "content":pregunta
+          "content":pregunta,
       };
-      conversation.push(objPregunta);
+      let objPreguntaTmp = {
+          "role":"user",
+          "content":pregunta,
+          "tmp": last
+      };
+      conversation.push(objPreguntaTmp);    
       return Llms.sendMsg(llm,model,conversation).then((respuesta) => {
         localStorage.setItem("Conversation."+idConversation+"-"+last,JSON.stringify(objPregunta));
-        objPregunta.tmp = last;
         
         let tmp = Date.now();
         if(tmp === last){
@@ -546,8 +550,8 @@ var Conversations = (function(){
         localStorage.setItem("Conversation."+idConversation+"-"+last,JSON.stringify(objRespuesta));
         objRespuesta.tmp = last; 
         conversation.push(objRespuesta);
-        nMsg += 2;
-        if(nMsg > MAX){
+        nMsgs += 2;
+        if(nMsgs > MAX){
             return hacerResumen(llm,model,respuesta);
         }
         return Promise.resolve(respuesta);
