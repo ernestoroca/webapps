@@ -437,6 +437,17 @@ var Conversations = (function(){
       let obj = JSON.parse(str);
       return obj;
     },
+    update: function(id,titulo){
+      let str = localStorage.getItem("Conversation-"+id);
+      if(!str){
+        return;
+      }
+      let obj = JSON.parse(str);
+      obj.titulo = titulo;
+      let str = JSON.stringify(obj);
+      localStorage.setItem("Conversation-"+id,str);
+      return;
+    },
     delete: function(id){
       localStorage.removeItem("Conversation-"+id);
 
