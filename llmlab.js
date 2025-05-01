@@ -365,9 +365,56 @@ var Conversations = (function(){
   const DELTA = 20;
   let conversation;
   let idConversation;
-  let system;
   let last = 0;
-  let posFirst = -1;
+  let nMsgs = 0;
+    
+  function hacerResumen(llm,model,resIni){
+    let vecMensajes = [];
+    vecMensajes.push(conversation[0]);
+
+    let len = conversation.length;
+    let i;
+    for(i=1;i<len;i++){
+      if(conversation[i].tmp>1e12){
+        break;
+      }
+    }
+    let ntmp = i; 
+    for(let l=0;l<DELTA;l++){
+      vecMensajes.push(conversation[i]);
+      i++;
+    }
+
+    let objPregunta = {
+      "role":"user",
+      "content":"Haz un resumen de la conversación de tal manera que puedas hacer un seguimiento.",
+    };
+    return Llms.sendMsg(llm,model,vecMensajes).then((respuesta) => {
+        let objRespuesta = {
+          "role":"assistant",
+          "content":respuesta.message,
+        };
+        localStorage.setItem("Conversation."+idConversation+"-"+ntmp,JSON.stringify(objPregunta));
+        localStorage.setItem("Conversation."+idConversation+"-"+(ntmp+1),JSON.stringify(objRespuesta));
+        objPregunta.tmp = ntmp;
+        objRespuesta.tmp = ntmp+1;
+        conversation.push(objPregunta);
+        conversation.push(objRespuesta);
+        let i = ntmp;
+        for(let l=0;l<DELTA;l++){
+          item = conversation[i];
+          localStorage.removeItem("Conversation."+idConversation+"-"+item.tmp);
+          i++;
+        }
+        nMsg -=20;
+        conversation.splice(ntmp,20);
+        conversation.splice(ntmp,0,objPregunta);
+        conversation.splice(ntmp+1,0,objRespuesta);
+        resIni.completion += respuesta.completion;
+        resIni.prompt += respuesta.prompt
+        return Promise.resolve(resIni);
+    });
+}
   return {
     create: function(agentId,title){
       let obj = {
@@ -422,7 +469,6 @@ var Conversations = (function(){
     initChat: function(id){
       conversation = [];
       last = 0;
-      posFirst = -1;
       let str = localStorage.getItem("Conversation-"+id);
       if(!str){
         idConversation = "";
@@ -433,35 +479,71 @@ var Conversations = (function(){
       let obj = JSON.parse(str);
       obj = Agents.read(obj.agent);
 
-      system = `
+      let system = `
         Your role is: ${obj.role}.
         Your goal is: ${obj.goal}.
         Your backstory is: ${obj.backstory}.
         Your process is: ${obj.process}.
       `;
+      conversacion.push({
+        "role":"system",
+        "content": system,
+        "tmp": 0
+      });
       let len = localStorage.length;
       let llave = "Conversation."+id+"-";
+      nMsgs = 0;
       for(let i=0;i<len;i++){
         let key = localStorage.key(i);
         if(key.includes(llave)){
           let valueStr = localStorage.getItem(key);
           let objMsg = JSON.parse(valueStr);
           objMsg.tmp = parseInt(key.replace(llave,""));
+          if(objMsg.tmp >1e12){
+            nMsgs++;  
+          }
           conversation.push(objMsg);
         }
       }
       conversation.sort((a,b)=>{(a.tmp>b.tmp)?+1:-1});
+      return true;
     },
-    addChat: function(msg){
+    ask: function(llm,model,pregunta){
       let tmp = Date.now();
       if(tmp === last){
         tmp++;
       }
       last = tmp;
-      localStorage.setItem("Conversation."+idConversation+"-"+last,JSON.stringify(msg));
-      msg.tmp = last;
-      conversation.push(msg);
-      return (conversation.length > MAX);
+      let objPregunta = {
+          "role":"user",
+          "content":pregunta
+      };
+      return Llms.sendMsg(llm,model,conversation).then((respuesta) => {
+        respuesta = res;
+        localStorage.setItem("Conversation."+idConversation+"-"+last,JSON.stringify(objPregunta));
+        objPregunta.tmp = last;
+        conversation.push(objPregunta);
+        
+        let tmp = Date.now();
+        if(tmp === last){
+            tmp++;
+        }
+        last = tmp;
+        let objRespuesta = {
+          "role":"assistant",
+          "content":respuesta.message,
+        };
+        localStorage.setItem("Conversation."+idConversation+"-"+last,JSON.stringify(objRespuesta));
+        objRespuesta.tmp = last; 
+        conversation.push(objRespuesta);
+        nMsg += 2;
+        if(nMsg > MAX){
+            return hacerResumen(llm,model,respuesta);
+        }
+        return Promise.resolve(respuesta);
+      }).then((res)=>{
+          return Promise.resolve(res);
+      });
     },
     readChat: function(){
       let len = conversation.length;
@@ -474,35 +556,6 @@ var Conversations = (function(){
       }
       return conversation.slice(min,len);
     },
-    readFirst(){
-      let len = conversation.length;
-      let i;
-      for(i=1;i<len;i++){
-        if(conversation[i].tmp>1e12){
-          break;
-        }
-      }
-      let vecMessages = [];
-      posFirst = i; 
-      for(let l=0;l<DELTA;l++){
-        vecMessages.push(conversation[i]);
-        i++;
-      }
-      return vecMessages;
-    },
-    setResume(msgQ,msgA){
-      if(posFirst < 0){
-        return;
-      }
-      localStorage.setItem("Conversation."+idConversation+"-"+posFirst,JSON.stringify(msgQ));
-      localStorage.setItem("Conversation."+idConversation+"-"+(posFirst+1),JSON.stringify(msgA));
-      msgQ.tmp = posFirst;
-      msgA.tmp = posFirst+1;
-      conversation.splice(posFirst,20);
-      conversation.splice(posFirst,0,msgQ);
-      conversation.splice(posFirst+1,0,msgA);
-      posFirst = -1;
-    }
   }
 }());
 
