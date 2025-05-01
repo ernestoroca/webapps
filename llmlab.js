@@ -444,7 +444,7 @@ var Conversations = (function(){
       }
       let obj = JSON.parse(str);
       obj.titulo = titulo;
-      let str = JSON.stringify(obj);
+      str = JSON.stringify(obj);
       localStorage.setItem("Conversation-"+id,str);
       return;
     },
