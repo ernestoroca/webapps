@@ -354,15 +354,8 @@ function printLasCharlas(){
   Conversations.initChat(laConversacion);
   let vecMsg = Conversations.readChat();
   let len = vecMsg.length;
-  if(len <3) {
-      return;
-  }
-  let i = len - 10;
-  if(i <= 1){
-    i=1;
-  }
   let strHtml = "";
-  for(;i<len;i+=2){
+  for(let i=0;i<len;i+=2){
     strHtml += `
     <div class="w3-panel w3-pale-green w3-leftbar w3-rightbar w3-border-green">${vecMsg[i].content}</div>
     <div class="w3-panel w3-pale-blue w3-leftbar w3-rightbar w3-border-blue">${vecMsg[i+1].content}</div>
