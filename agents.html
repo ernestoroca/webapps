@@ -284,6 +284,21 @@ function formConversacion(convid){
         modales.remove();
         modales = null;
         break;
+      case "modal-guardar":
+        let conv = document.getElementById("modal-conv").value;
+        let titulo = document.getElementById("modal-titulo").value;
+        if(titulo === ""){
+          return;
+        }
+        if(conv === "new"){
+          Conversations.create(titulo);
+        } conv {
+          Conversations.update(conv,titulo);
+        }
+        modales.remove();
+        modales = null;
+        printLasConversaciones();
+        break;
     }
   };
   
