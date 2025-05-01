@@ -496,7 +496,7 @@ var Conversations = (function(){
         Your backstory is: ${obj.backstory}.
         Your process is: ${obj.process}.
       `;
-      conversacion.push({
+      conversation.push({
         "role":"system",
         "content": system,
         "tmp": 0
