@@ -389,6 +389,7 @@ var Conversations = (function(){
       "role":"user",
       "content":"Haz un resumen de la conversación de tal manera que puedas hacer un seguimiento.",
     };
+    vecMensajes.push(objPregunta);  
     return Llms.sendMsg(llm,model,vecMensajes).then((respuesta) => {
         let objRespuesta = {
           "role":"assistant",
