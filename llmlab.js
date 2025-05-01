@@ -529,11 +529,12 @@ var Conversations = (function(){
           "role":"user",
           "content":pregunta
       };
+      conversation.push(objPregunta);
       return Llms.sendMsg(llm,model,conversation).then((respuesta) => {
         respuesta = res;
         localStorage.setItem("Conversation."+idConversation+"-"+last,JSON.stringify(objPregunta));
         objPregunta.tmp = last;
-        conversation.push(objPregunta);
+        
         
         let tmp = Date.now();
         if(tmp === last){
