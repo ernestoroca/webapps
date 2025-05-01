@@ -505,7 +505,7 @@ document.getElementById("model-list").onchange = function(){
     let pricing = data.pricing;
     usage.pricing_completion = parseFloat(pricing.completion);
     usage.pricing_prompt = parseFloat(pricing.prompt);
-    document.getElementById("precio-elegido").innerHTML = "" +(1e6*usage.pricing_prompt) "/"+(1e6*usage.pricing_completion);
+    document.getElementById("precio-elegido").innerHTML = ""+ (1e6*usage.pricing_prompt) +"/"+ (1e6*usage.pricing_completion);
 }
 
 //-----------
