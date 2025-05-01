@@ -241,7 +241,7 @@ function printLasConversaciones(){
 
 function printUnaConversacion(convid){
   laConversacion = convid;
-  let losDatos = Conversation.read(convid);
+  let losDatos = Conversations.read(convid);
   document.getElementById("modal-titulo").value = losDatos.titulo; 
 }
 
