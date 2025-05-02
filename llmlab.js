@@ -381,8 +381,7 @@ var Conversations = (function(){
     }
     let ntmp = i; 
     for(let l=0;l<DELTA;l++){
-      vecMensajes.push(conversation[i]);
-      i++;
+      vecMensajes.push(conversation[i++]);
     }
 
     let objPregunta = {
@@ -403,12 +402,11 @@ var Conversations = (function(){
         conversation.push(objRespuesta);
         let i = ntmp;
         for(let l=0;l<DELTA;l++){
-          item = conversation[i];
+          item = conversation[i++];
           localStorage.removeItem("Conversation."+idConversation+"-"+item.tmp);
-          i++;
         }
-        nMsg -=20;
-        conversation.splice(ntmp,20);
+        nMsg -=DELTA;
+        conversation.splice(ntmp,DELTA);
         conversation.splice(ntmp,0,objPregunta);
         conversation.splice(ntmp+1,0,objRespuesta);
         resIni.completion += respuesta.completion;
