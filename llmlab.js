@@ -563,7 +563,7 @@ var Conversations = (function(){
       if(len<3){
         return [];
       }
-      let min = len - 20;
+      let min = len - 40;
       if(min < 1){
         min = 1;
       }
