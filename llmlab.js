@@ -515,7 +515,7 @@ var Conversations = (function(){
           conversation.push(objMsg);
         }
       }
-      conversation.sort((a,b)=>{(a.tmp>b.tmp)?+1:-1});
+      conversation.sort((a,b)=>{return (a.tmp>b.tmp)?+1:-1});
       return true;
     },
     ask: function(llm,model,pregunta){
