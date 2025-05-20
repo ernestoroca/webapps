@@ -405,10 +405,11 @@ var Conversations = (function(){
           item = conversation[i++];
           localStorage.removeItem("Conversation."+idConversation+"-"+item.tmp);
         }
-        nMsg -=DELTA;
+        nMsgs -=DELTA;
         conversation.splice(ntmp,DELTA);
         conversation.splice(ntmp,0,objPregunta);
         conversation.splice(ntmp+1,0,objRespuesta);
+        conversation.sort((a,b)=>{return (a.tmp>b.tmp)?+1:-1});
         resIni.completion += respuesta.completion;
         resIni.prompt += respuesta.prompt
         return Promise.resolve(resIni);
