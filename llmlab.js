@@ -407,8 +407,6 @@ var Conversations = (function(){
         }
         nMsgs -=DELTA;
         conversation.splice(ntmp,DELTA);
-        conversation.splice(ntmp,0,objPregunta);
-        conversation.splice(ntmp+1,0,objRespuesta);
         conversation.sort((a,b)=>{return (a.tmp>b.tmp)?+1:-1});
         resIni.completion += respuesta.completion;
         resIni.prompt += respuesta.prompt
