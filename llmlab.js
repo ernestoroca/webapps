@@ -958,7 +958,7 @@ var Chat = (function(){
                 "tmp": 0
             }
         }
-    }
+    },
     initChat: function(id){
       last = 0;
       let str = localStorage.getItem("Conversation-"+id);
