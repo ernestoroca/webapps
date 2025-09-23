@@ -230,7 +230,7 @@ document.getElementById("show-agentes").onclick = function(){
         document.getElementById("agente-prompt").value = prompt;
     }
     document.getElementById("agente-enviar").onclick = function(event){
-        event.preventeDefault();
+        event.preventDefault();
         if(agenteSelect === null){
             return;
         }
