@@ -222,7 +222,7 @@ document.getElementById("show-agentes").onclick = function(){
             titulo = "";
             prompt = "";
         } else {
-            let unPrompt = Prompts.read(val);
+            let unPrompt = Prompts.read(agenteSelect);
             titulo = unPrompt.label;
             prompt = unPrompt.system;
         }
