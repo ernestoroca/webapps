@@ -869,8 +869,8 @@ var Chat = (function(){
           "role":"assistant",
           "content":respuesta.message,
         };
-        localStorage.setItem("Conversation."+idConversation+"-"+ntmp,JSON.stringify(objPregunta));
-        localStorage.setItem("Conversation."+idConversation+"-"+(ntmp+1),JSON.stringify(objRespuesta));
+        localStorage.setItem("Chat."+idConversation+"-"+ntmp,JSON.stringify(objPregunta));
+        localStorage.setItem("Chat."+idConversation+"-"+(ntmp+1),JSON.stringify(objRespuesta));
         objPregunta.tmp = ntmp;
         objRespuesta.tmp = ntmp+1;
         conversation.push(objPregunta);
@@ -878,7 +878,7 @@ var Chat = (function(){
         let i = ntmp;
         for(let l=0;l<DELTA;l++){
           item = conversation[i++];
-          localStorage.removeItem("Conversation."+idConversation+"-"+item.tmp);
+          localStorage.removeItem("Chat."+idConversation+"-"+item.tmp);
         }
         nMsgs -=DELTA;
         conversation.splice(ntmp,DELTA);
@@ -897,12 +897,12 @@ var Chat = (function(){
       let id,x;
       do {
         id = Tools.makeid(16);
-        x = localStorage.getItem("Conversation-"+id);
+        x = localStorage.getItem("Chat-"+id);
       } while(x);
-      localStorage.setItem("Conversation-"+id,str);
+      localStorage.setItem("Chat-"+id,str);
     },
     read: function(id){
-      let str = localStorage.getItem("Conversation-"+id);
+      let str = localStorage.getItem("Chat-"+id);
       if(!str){
         return null;
       }
@@ -910,18 +910,18 @@ var Chat = (function(){
       return obj;
     },
     update: function(id,titulo){
-      let str = localStorage.getItem("Conversation-"+id);
+      let str = localStorage.getItem("Chat-"+id);
       if(!str){
         return;
       }
       let obj = JSON.parse(str);
       obj.titulo = titulo;
       str = JSON.stringify(obj);
-      localStorage.setItem("Conversation-"+id,str);
+      localStorage.setItem("Chat-"+id,str);
       return;
     },
     delete: function(id){
-      localStorage.removeItem("Conversation-"+id);
+      localStorage.removeItem("Chat-"+id);
 
       //remove the messages from this conversation
       let len = localStorage.length;
@@ -938,7 +938,7 @@ var Chat = (function(){
       let res = [];
       for(let i=0;i<len;i++){
         let key = localStorage.key(i);
-        if(key.includes("Conversation-")){
+        if(key.includes("Chat-")){
           let objStr = localStorage.getItem(key);
           let obj = JSON.parse(objStr);
           obj.key = key;
@@ -961,7 +961,7 @@ var Chat = (function(){
     },
     initChat: function(id){
       last = 0;
-      let str = localStorage.getItem("Conversation-"+id);
+      let str = localStorage.getItem("Chat-"+id);
       if(!str){
         conversation = null;  
         return false;
@@ -1008,7 +1008,7 @@ var Chat = (function(){
       };
       conversation.push(objPreguntaTmp);    
       return Llms.sendMsg(llm,model,conversation).then((respuesta) => {
-        localStorage.setItem("Conversation."+idConversation+"-"+last,JSON.stringify(objPregunta));
+        localStorage.setItem("Chat."+idConversation+"-"+last,JSON.stringify(objPregunta));
         
         let tmp = Date.now();
         if(tmp === last){
@@ -1019,7 +1019,7 @@ var Chat = (function(){
           "role":"assistant",
           "content":respuesta.message,
         };
-        localStorage.setItem("Conversation."+idConversation+"-"+last,JSON.stringify(objRespuesta));
+        localStorage.setItem("Chat."+idConversation+"-"+last,JSON.stringify(objRespuesta));
         objRespuesta.tmp = last; 
         conversation.push(objRespuesta);
         nMsgs += 2;
