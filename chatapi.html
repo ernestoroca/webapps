@@ -206,7 +206,7 @@ document.getElementById("show-agentes").onclick = function(){
     
     printAgentes();
     document.getElementById("lista-agentes").onclick = function (event){
-        event.preventeDefault();
+        event.preventDefault();
         let target = event.target;
         while(target.id === ""){
             target = target.parentNode;
