@@ -900,6 +900,7 @@ var Chat = (function(){
         x = localStorage.getItem("Chat-"+id);
       } while(x);
       localStorage.setItem("Chat-"+id,str);
+      return id;
     },
     read: function(id){
       let str = localStorage.getItem("Chat-"+id);
