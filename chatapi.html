@@ -112,9 +112,9 @@ function printChats(){
     let len = lista.length;
     let strHtml = ``;
     for(let i=0;i<len;i++){
-        strHtml += `<button class="w3-button w3-round w3-blue" id="chat-${lista[i]}">${lista[i]}</button>`;
+        strHtml += `<button class="w3-button w3-round w3-blue" id="${lista[i].key}">${lista[i].title}</button>`;
     }
-    strHtml += `<button class="w3-button w3-round w3-blue" id="chat-NUEVO">+</button>`;
+    strHtml += `<button class="w3-button w3-round w3-blue" id="Chat-NUEVO">+</button>`;
     document.getElementById("lista-chats").innerHTML = strHtml;
 }
 
