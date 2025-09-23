@@ -833,3 +833,214 @@ var Process = (function(){
         }
     };
 }());
+
+var Chat = (function(){
+  const MAX = 200;
+  const DELTA = 20;
+  let conversation;
+  let idConversation;
+  let last = 0;
+  let nMsgs = 0;
+  let llm,model,promptid;
+    
+  function hacerResumen(llm,model,resIni){
+    let vecMensajes = [];
+    vecMensajes.push(conversation[0]);
+
+    let len = conversation.length;
+    let i;
+    for(i=1;i<len;i++){
+      if(conversation[i].tmp>1e12){
+        break;
+      }
+    }
+    let ntmp = i; 
+    for(let l=0;l<DELTA;l++){
+      vecMensajes.push(conversation[i++]);
+    }
+
+    let objPregunta = {
+      "role":"user",
+      "content":"Haz un resumen de la conversación de tal manera que puedas hacer un seguimiento.",
+    };
+    vecMensajes.push(objPregunta);  
+    return Llms.sendMsg(llm,model,vecMensajes).then((respuesta) => {
+        let objRespuesta = {
+          "role":"assistant",
+          "content":respuesta.message,
+        };
+        localStorage.setItem("Conversation."+idConversation+"-"+ntmp,JSON.stringify(objPregunta));
+        localStorage.setItem("Conversation."+idConversation+"-"+(ntmp+1),JSON.stringify(objRespuesta));
+        objPregunta.tmp = ntmp;
+        objRespuesta.tmp = ntmp+1;
+        conversation.push(objPregunta);
+        conversation.push(objRespuesta);
+        let i = ntmp;
+        for(let l=0;l<DELTA;l++){
+          item = conversation[i++];
+          localStorage.removeItem("Conversation."+idConversation+"-"+item.tmp);
+        }
+        nMsgs -=DELTA;
+        conversation.splice(ntmp,DELTA);
+        conversation.sort((a,b)=>{return (a.tmp>b.tmp)?+1:-1});
+        resIni.completion += respuesta.completion;
+        resIni.prompt += respuesta.prompt
+        return Promise.resolve(resIni);
+    });
+}
+  return {
+    create: function(titulo){
+      let obj = {
+        title: titulo+":"+Date.now(),
+      };
+      let str = JSON.stringify(obj);
+      let id,x;
+      do {
+        id = Tools.makeid(16);
+        x = localStorage.getItem("Conversation-"+id);
+      } while(x);
+      localStorage.setItem("Conversation-"+id,str);
+    },
+    read: function(id){
+      let str = localStorage.getItem("Conversation-"+id);
+      if(!str){
+        return null;
+      }
+      let obj = JSON.parse(str);
+      return obj;
+    },
+    update: function(id,titulo){
+      let str = localStorage.getItem("Conversation-"+id);
+      if(!str){
+        return;
+      }
+      let obj = JSON.parse(str);
+      obj.titulo = titulo;
+      str = JSON.stringify(obj);
+      localStorage.setItem("Conversation-"+id,str);
+      return;
+    },
+    delete: function(id){
+      localStorage.removeItem("Conversation-"+id);
+
+      //remove the messages from this conversation
+      let len = localStorage.length;
+      let llave = "Message."+id+"-";
+      for(let i=0;i<len;i++){
+        let key = localStorage.key(i);
+        if(key.includes(llave)){
+          localStorage.removeItem(key);
+        }
+      }
+    },
+    list: function(){
+      let len = localStorage.length;
+      let res = [];
+      for(let i=0;i<len;i++){
+        let key = localStorage.key(i);
+        if(key.includes("Conversation-")){
+          let objStr = localStorage.getItem(key);
+          let obj = JSON.parse(objStr);
+          obj.key = key;
+          res.push(obj);
+        }
+      }
+      return res;
+    },
+    setParams: function(_llm,_model,_promptid){
+        llm = _llm;
+        model = _model;
+        promptid = _promptid;
+        if(conversation && conversation.length > 0){
+            conversation[0] = {
+                "role":"system",
+                "content": Prompts.read(promptid),
+                "tmp": 0
+            }
+        }
+    }
+    initChat: function(id){
+      last = 0;
+      let str = localStorage.getItem("Conversation-"+id);
+      if(!str){
+        conversation = null;  
+        return false;
+      }
+      conversation = [];
+      idConversation = id;
+      conversation.push({
+        "role":"system",
+        "content": Prompts.read(promptid),
+        "tmp": 0
+      });
+      let len = localStorage.length;
+      let llave = "Conversation."+id+"-";
+      nMsgs = 0;
+      for(let i=0;i<len;i++){
+        let key = localStorage.key(i);
+        if(key.includes(llave)){
+          let valueStr = localStorage.getItem(key);
+          let objMsg = JSON.parse(valueStr);
+          objMsg.tmp = parseInt(key.replace(llave,""));
+          if(objMsg.tmp >1e12){
+            nMsgs++;  
+          }
+          conversation.push(objMsg);
+        }
+      }
+      conversation.sort((a,b)=>{return (a.tmp>b.tmp)?+1:-1});
+      return true;
+    },
+    ask: function(pregunta){
+      let tmp = Date.now();
+      if(tmp === last){
+        tmp++;
+      }
+      last = tmp;
+      let objPregunta = {
+          "role":"user",
+          "content":pregunta,
+      };
+      let objPreguntaTmp = {
+          "role":"user",
+          "content":pregunta,
+          "tmp": last
+      };
+      conversation.push(objPreguntaTmp);    
+      return Llms.sendMsg(llm,model,conversation).then((respuesta) => {
+        localStorage.setItem("Conversation."+idConversation+"-"+last,JSON.stringify(objPregunta));
+        
+        let tmp = Date.now();
+        if(tmp === last){
+            tmp++;
+        }
+        last = tmp;
+        let objRespuesta = {
+          "role":"assistant",
+          "content":respuesta.message,
+        };
+        localStorage.setItem("Conversation."+idConversation+"-"+last,JSON.stringify(objRespuesta));
+        objRespuesta.tmp = last; 
+        conversation.push(objRespuesta);
+        nMsgs += 2;
+        if(nMsgs > MAX){
+            return hacerResumen(llm,model,respuesta);
+        }
+        return Promise.resolve(respuesta);
+      }).then((res)=>{
+          return Promise.resolve(res);
+      });
+    },
+    readChat: function(){
+      let len = conversation.length;
+      if(len<3){
+        return [];
+      }
+      let min = len - 40;
+      if(min < 1){
+        min = 1;
+      }
+      return conversation.slice(min,len);
+    },
+  }
+}());
