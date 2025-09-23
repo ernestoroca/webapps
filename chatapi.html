@@ -288,10 +288,14 @@ document.getElementById("show-chats").onclick = function(){
         document.getElementById("pregunta-chat").value = "";
         
         chatSelect = target.id.replace("chat-","");
-        if(agenteSelect !== "NUEVO"){
+        if(chatSelect !== "NUEVO"){
             Chat.setParams(llmSelect,modelSelect,agenteSelect);
             Chat.initChat(chatSelect);
             printConversacion()
+        } else {
+            chatSelect = Chat.create("");
+            Chat.setParams(llmSelect,modelSelect,agenteSelect);
+            Chat.initChat(chatSelect);
         }
     }
     document.getElementById("pregunta-enviar").onclick = function(event){
