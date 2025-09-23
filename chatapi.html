@@ -130,6 +130,33 @@ function printAgentes(){
     document.getElementById("lista-agentes").innerHTML = strHtml;
 }
 
+function printChats(){
+    let lista = Chat.list();
+    let len = lista.length;
+    let strHtml = ``;
+    for(let i=0;i<len;i++){
+        strHtml += `<button class="w3-button w3-round w3-blue" id="chat-${lista[i]}">${lista[i]}</button>`;
+    }
+    strHtml += `<button class="w3-button w3-round w3-blue" id="chat-NUEVO">+</button>`;
+    document.getElementById("lista-agentes").innerHTML = strHtml;
+}
+
+function printConversacion(){
+    let lista = Chat.readChat();
+    let len = lista.length;
+    let strHtml = ``;
+    for(let i=0;i<len;i++){
+        let item = lista[i];
+        strHtml += `
+<div class="w3-panel w3-pale-red w3-leftbar w3-border-red">
+  <p>London is the most populous city in the United Kingdom,
+  with a metropolitan area of over 9 million inhabitants.</p>
+</div>`;
+    }
+    document.getElementById("lista-agentes").innerHTML = strHtml;
+}
+    
+
 window.onload = function(){
     formKey();
     Llms.init();
@@ -138,6 +165,7 @@ window.onload = function(){
 var llmSelect = null;
 var modelSelect = null;
 var agenteSelect = null;
+var chatSelect = null;
     
 
 document.getElementById("show-modelos").onclick = function(){
@@ -249,6 +277,67 @@ document.getElementById("show-agentes").onclick = function(){
         printAgentes();
     }
 };
+
+document.getElementById("show-chats").onclick = function(){
+    document.getElementById("show-parametros").innerHTML = `
+  <div class="w3-row">  
+    <div class="w3-col s12" id="lista-chats"></div>
+  </div>
+  <div id="conversacion-chat"></div>
+  <div class="w3-row">  
+    <div class="w3-col s12">
+      <p>      
+        <input class="w3-input w3-border" name="pregunta-chat" type="text" id="pregunta-chat">
+      </p>
+      <p>      
+        <button class="w3-btn w3-blue" id="pregunta-enviar">Enviar</button>
+      </p>
+    </div>
+  </div>
+    
+    `;
+    
+    printChats();
+    document.getElementById("lista-chats").onclick = function (event){
+        event.preventDefault();
+        let target = event.target;
+        while(target.id === ""){
+            target = target.parentNode;
+        }
+        if(!target.id.includes("chat-")){
+            return;
+        }
+        document.getElementById("conversacion-chat").innerHTML = "";
+        document.getElementById("pregunta-chat").value = "";
+        
+        chatSelect = target.id.replace("chat-","");
+        if(agenteSelect !== "NUEVO"){
+            Chat.setParams(llmSelect,modelSelect,agenteSelect);
+            Chat.initChat(chatSelect);
+            printConversacion()
+        }
+    }
+    document.getElementById("pregunta-enviar").onclick = function(event){
+        event.preventDefault();
+        if(agenteSelect === null){
+            return;
+        }
+        if(agenteSelect === "VACIO"){
+            return;
+        }
+        
+        let titulo = document.getElementById("agente-titulo").value;
+        let prompt = document.getElementById("agente-prompt").value;
+        
+        if(agenteSelect === "NUEVO"){
+            Prompts.create(titulo,prompt,"");
+        } else {
+            Prompts.update(agenteSelect,titulo,prompt,"");
+        }
+        printAgentes();
+    }
+};
+
 
 </script>
 </body>
