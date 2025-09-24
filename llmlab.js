@@ -955,7 +955,7 @@ var Chat = (function(){
         if(conversation && conversation.length > 0){
             conversation[0] = {
                 "role":"system",
-                "content": Prompts.read(promptid),
+                "content": Prompts.read(promptid).system,
                 "tmp": 0
             }
         }
@@ -971,7 +971,7 @@ var Chat = (function(){
       idConversation = id;
       conversation.push({
         "role":"system",
-        "content": Prompts.read(promptid),
+        "content": Prompts.read(promptid).system,
         "tmp": 0
       });
       let len = localStorage.length;
