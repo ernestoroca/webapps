@@ -926,12 +926,17 @@ var Chat = (function(){
 
       //remove the messages from this conversation
       let len = localStorage.length;
+      let llavesBorrar = [];  
       let llave = "Chat."+id+"-";
       for(let i=0;i<len;i++){
         let key = localStorage.key(i);
         if(key.includes(llave)){
-          localStorage.removeItem(key);
+          llavesBorrar.push(key);
         }
+      }
+      len = llavesBorrar.length;
+      for(let i=0;i<len;i++){
+        localStorage.removeItem(llavesBorrar[i]);  
       }
     },
     list: function(){
