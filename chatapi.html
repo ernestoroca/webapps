@@ -287,8 +287,8 @@ document.getElementById("show-chats").onclick = function(){
         document.getElementById("conversacion-chat").innerHTML = "";
         document.getElementById("pregunta-chat").value = "";
         
-        chatSelect = target.id.replace("chat-","");
-        if(chatSelect !== "NUEVO"){
+        chatSelect = target.id;
+        if(chatSelect !== "Chat-NUEVO"){
             Chat.setParams(llmSelect,modelSelect,agenteSelect);
             Chat.initChat(chatSelect);
             printConversacion()
