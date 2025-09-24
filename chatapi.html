@@ -124,11 +124,18 @@ function printConversacion(){
     let strHtml = ``;
     for(let i=0;i<len;i++){
         let item = lista[i];
-        strHtml += `
-<div class="w3-panel w3-pale-red w3-leftbar w3-border-red">
-  <p>London is the most populous city in the United Kingdom,
-  with a metropolitan area of over 9 million inhabitants.</p>
+        if(item.role === "user"){
+          strHtml += `
+<div class="w3-panel w3-pale-green w3-leftbar w3-border-green">
+  <p>${item.content}</p>
 </div>`;
+        } else {
+          strHtml += `
+<div class="w3-panel w3-pale-red w3-leftbar w3-border-red">
+  ${item.content}
+</div>`;
+        }
+        
     }
     document.getElementById("conversacion-chat").innerHTML = strHtml;
 }
