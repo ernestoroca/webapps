@@ -975,7 +975,7 @@ var Chat = (function(){
         "tmp": 0
       });
       let len = localStorage.length;
-      let llave = "Conversation."+id+"-";
+      let llave = "Chat."+id+"-";
       nMsgs = 0;
       for(let i=0;i<len;i++){
         let key = localStorage.key(i);
