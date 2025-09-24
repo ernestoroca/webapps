@@ -926,7 +926,7 @@ var Chat = (function(){
 
       //remove the messages from this conversation
       let len = localStorage.length;
-      let llave = "Message."+id+"-";
+      let llave = "Chat."+id+"-";
       for(let i=0;i<len;i++){
         let key = localStorage.key(i);
         if(key.includes(llave)){
