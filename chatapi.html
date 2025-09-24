@@ -275,6 +275,8 @@ document.getElementById("show-chats").onclick = function(){
       </p>
       <p>      
         <button class="w3-btn w3-blue" id="pregunta-enviar">Enviar</button>
+        <button class="w3-btn w3-red" id="chat-borrar">BORRAR</button>
+        <button class="w3-btn w3-orange" id="chat-bifurcar">Bifurcar</button>
       </p>
     </div>
   </div>
@@ -328,7 +330,15 @@ document.getElementById("show-chats").onclick = function(){
           div.classList.add("w3-panel","w3-pale-red","w3-leftbar","w3-border-red");
           div.innerHTML = respuesta.message;
           document.getElementById("conversacion-chat").appendChild(div);
+
+          document.getElementById("pregunta-chat").value = "";
         });
+    }
+    document.getElementById("chat-borrar").onclick = function(event){
+      event.preventDefault();
+      Chat.delete(chatSelect);
+      document.getElementById("conversacion-chat").innerHTML = "";
+      printChats();
     }
 };
 
