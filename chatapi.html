@@ -112,7 +112,7 @@ function printChats(){
     let len = lista.length;
     let strHtml = ``;
     for(let i=0;i<len;i++){
-        strHtml += `<button class="w3-button w3-round w3-blue" id="${lista[i].key}">${lista[i].title}</button>`;
+        strHtml += `<button class="w3-button w3-round w3-blue" id="Chat-${lista[i].key}">${lista[i].title}</button>`;
     }
     strHtml += `<button class="w3-button w3-round w3-blue" id="Chat-NUEVO">+</button>`;
     document.getElementById("lista-chats").innerHTML = strHtml;
@@ -287,8 +287,8 @@ document.getElementById("show-chats").onclick = function(){
         document.getElementById("conversacion-chat").innerHTML = "";
         document.getElementById("pregunta-chat").value = "";
         
-        chatSelect = target.id;
-        if(chatSelect !== "Chat-NUEVO"){
+        chatSelect = target.id.replace("Chat-","");
+        if(chatSelect !== "NUEVO"){
             Chat.setParams(llmSelect,modelSelect,agenteSelect);
             Chat.initChat(chatSelect);
             printConversacion()
