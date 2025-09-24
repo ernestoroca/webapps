@@ -271,7 +271,6 @@ document.getElementById("show-chats").onclick = function(){
       </p>
     </div>
   </div>
-    
     `;
     
     printChats();
@@ -307,15 +306,22 @@ document.getElementById("show-chats").onclick = function(){
             return;
         }
         
-        let titulo = document.getElementById("agente-titulo").value;
-        let prompt = document.getElementById("agente-prompt").value;
+        let pregunta = document.getElementById("pregunta-chat").value.trim();
         
-        if(agenteSelect === "NUEVO"){
-            Prompts.create(titulo,prompt,"");
-        } else {
-            Prompts.update(agenteSelect,titulo,prompt,"");
+        if(pregunta === ""){
+            return;
         }
-        printAgentes();
+        Chat.ask(pregunta).then((respuesta)=>{
+          let div = document.createElement("div");
+          div.classList.add("w3-panel","w3-pale-green","w3-leftbar","w3-border-green");
+          div.innerHTML = "<p>"+pregunta+"</p>";
+          document.getElementById("conversacion-chat").appendChild(div);
+
+          div = document.createElement("div");
+          div.classList.add("w3-panel","w3-pale-red","w3-leftbar","w3-border-red");
+          div.innerHTML = "<p>"+pregunta+"</p>";
+          document.getElementById("conversacion-chat").appendChild(div);
+        });
     }
 };
 
