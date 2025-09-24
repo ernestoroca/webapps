@@ -319,7 +319,7 @@ document.getElementById("show-chats").onclick = function(){
 
           div = document.createElement("div");
           div.classList.add("w3-panel","w3-pale-red","w3-leftbar","w3-border-red");
-          div.innerHTML = "<p>"+pregunta+"</p>";
+          div.innerHTML = respuesta.message;
           document.getElementById("conversacion-chat").appendChild(div);
         });
     }
