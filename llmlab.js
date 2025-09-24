@@ -942,7 +942,7 @@ var Chat = (function(){
         if(key.includes("Chat-")){
           let objStr = localStorage.getItem(key);
           let obj = JSON.parse(objStr);
-          obj.key = key;
+          obj.key = key.replace("Chat-","");
           res.push(obj);
         }
       }
