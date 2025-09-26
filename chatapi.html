@@ -22,7 +22,9 @@
       <button class="w3-button w3-round w3-blue" id="show-chats">Chats</button>
     </div>
   </div><br>
-  <div id="show-parametros"></div><br>
+  <div id="form-modelos"></div>
+  <div id="form-agentes"></div>
+  <div id="form-chats"></div><br>
 </div>
 <script>
 function formKey(){
@@ -153,7 +155,8 @@ var chatSelect = null;
     
 
 document.getElementById("show-modelos").onclick = function(){
-    document.getElementById("show-parametros").innerHTML = `
+    document.getElementById("form-agentes").innerHTML = "";
+    document.getElementById("form-modelos").innerHTML = `
   <div class="w3-row">  
     <div class="w3-col s6">
       <select class="w3-select" name="select-llms" id="select-llms"></select>
@@ -194,7 +197,8 @@ document.getElementById("show-modelos").onclick = function(){
 };
 
 document.getElementById("show-agentes").onclick = function(){
-    document.getElementById("show-parametros").innerHTML = `
+    document.getElementById("form-modelos").innerHTML = "";
+    document.getElementById("form-agentes").innerHTML = `
   <div class="w3-row">  
     <div class="w3-col s12" id="lista-agentes"></div>
   </div>
@@ -263,7 +267,7 @@ document.getElementById("show-agentes").onclick = function(){
 };
 
 document.getElementById("show-chats").onclick = function(){
-    document.getElementById("show-parametros").innerHTML = `
+    document.getElementById("form-chats").innerHTML = `
   <div class="w3-row">  
     <div class="w3-col s12" id="lista-chats"></div>
   </div>
