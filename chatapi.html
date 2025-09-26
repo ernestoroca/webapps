@@ -18,13 +18,27 @@
     <div class="w3-col s4">
       <button class="w3-button w3-round w3-blue" id="show-agentes">Agentes</button>
     </div>
-    <div class="w3-col s4">
-      <button class="w3-button w3-round w3-blue" id="show-chats">Chats</button>
-    </div>
   </div><br>
   <div id="form-modelos"></div>
   <div id="form-agentes"></div>
-  <div id="form-chats"></div><br>
+  <hr><hr>
+  <div id="form-chats">
+    <div class="w3-row">  
+      <div class="w3-col s12" id="lista-chats"></div>
+    </div>
+    <div id="conversacion-chat"></div>
+    <div class="w3-row">  
+      <div class="w3-col s12">
+        <p>      
+          <input class="w3-input w3-border" name="pregunta-chat" type="text" id="pregunta-chat">
+        </p>
+        <p>      
+          <button class="w3-btn w3-blue" id="pregunta-enviar">Enviar</button>
+          <button class="w3-btn w3-red" id="chat-borrar">BORRAR</button>
+        </p>
+      </div>
+    </div>
+  </div>
 </div>
 <script>
 function formKey(){
@@ -135,7 +149,11 @@ function printConversacion(){
           strHtml += `
 <div class="w3-panel w3-pale-red w3-leftbar w3-border-red">
   ${item.content}
-</div>`;
+</div>
+<div>
+  <button class="w3-button w3-round w3-blue" id="bifurcar-${i}">Bifurcar</button>
+</div>
+`;
         }
         
     }
@@ -266,28 +284,8 @@ document.getElementById("show-agentes").onclick = function(){
     }
 };
 
-document.getElementById("show-chats").onclick = function(){
-    document.getElementById("form-chats").innerHTML = `
-  <div class="w3-row">  
-    <div class="w3-col s12" id="lista-chats"></div>
-  </div>
-  <div id="conversacion-chat"></div>
-  <div class="w3-row">  
-    <div class="w3-col s12">
-      <p>      
-        <input class="w3-input w3-border" name="pregunta-chat" type="text" id="pregunta-chat">
-      </p>
-      <p>      
-        <button class="w3-btn w3-blue" id="pregunta-enviar">Enviar</button>
-        <button class="w3-btn w3-red" id="chat-borrar">BORRAR</button>
-        <button class="w3-btn w3-orange" id="chat-bifurcar">Bifurcar</button>
-      </p>
-    </div>
-  </div>
-    `;
-    
-    printChats();
-    document.getElementById("lista-chats").onclick = function (event){
+printChats();
+document.getElementById("lista-chats").onclick = function (event){
         event.preventDefault();
         let target = event.target;
         while(target.id === ""){
@@ -309,8 +307,8 @@ document.getElementById("show-chats").onclick = function(){
             Chat.setParams(llmSelect,modelSelect,agenteSelect);
             Chat.initChat(chatSelect);
         }
-    }
-    document.getElementById("pregunta-enviar").onclick = function(event){
+}
+document.getElementById("pregunta-enviar").onclick = function(event){
         event.preventDefault();
         if(agenteSelect === null){
             return;
@@ -337,14 +335,13 @@ document.getElementById("show-chats").onclick = function(){
 
           document.getElementById("pregunta-chat").value = "";
         });
-    }
-    document.getElementById("chat-borrar").onclick = function(event){
+}
+document.getElementById("chat-borrar").onclick = function(event){
       event.preventDefault();
       Chat.delete(chatSelect);
       document.getElementById("conversacion-chat").innerHTML = "";
       printChats();
-    }
-};
+}
 
 
 </script>
