@@ -209,11 +209,13 @@ document.getElementById("show-modelos").onclick = function(){
     document.getElementById("select-llms").onchange = function(){
         llmSelect = document.getElementById("select-llms").value;
         printModelos();
+        Chat.setParams(llmSelect,modelSelect,agenteSelect);
     };
     
     document.getElementById("select-modelos").onchange = function(){
         modelSelect = document.getElementById("select-modelos").value;
         modelData();
+        Chat.setParams(llmSelect,modelSelect,agenteSelect);
     };
 };
 
@@ -258,6 +260,7 @@ document.getElementById("show-agentes").onclick = function(){
         if(agenteSelect === "VACIO"){
             titulo = "VACIO";
             prompt = "VACIO";
+            Chat.setParams(llmSelect,modelSelect,agenteSelect);
         } else if(agenteSelect === "NUEVO"){
             titulo = "";
             prompt = "";
@@ -265,6 +268,7 @@ document.getElementById("show-agentes").onclick = function(){
             let unPrompt = Prompts.read(agenteSelect);
             titulo = unPrompt.label;
             prompt = unPrompt.system;
+            Chat.setParams(llmSelect,modelSelect,agenteSelect);
         }
         document.getElementById("agente-titulo").value = titulo;
         document.getElementById("agente-prompt").value = prompt;
