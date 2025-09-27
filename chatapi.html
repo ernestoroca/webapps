@@ -335,10 +335,6 @@ document.getElementById("pregunta-enviar").onclick = function(event){
         if(agenteSelect === null){
             return;
         }
-        if(agenteSelect === "VACIO"){
-            return;
-        }
-        
         let pregunta = document.getElementById("pregunta-chat").value.trim();
         
         if(pregunta === ""){
