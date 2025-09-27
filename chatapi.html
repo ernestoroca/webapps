@@ -11,6 +11,7 @@
 <body>
 
 <div class="w3-container">
+  <br>
   <div class="w3-row">
     <div class="w3-col s4">
       <button class="w3-button w3-round w3-blue" id="show-modelos">Modelos</button>
@@ -166,12 +167,11 @@ window.onload = function(){
     Llms.init();
 };
 
-var llmSelect = null;
-var modelSelect = null;
-var agenteSelect = null;
+var llmSelect = "mistralai";
+var modelSelect = "mistral-nemo:free";
+var agenteSelect = "VACIO";
 var chatSelect = null;
-    
-
+  
 document.getElementById("show-modelos").onclick = function(){
     if(document.getElementById("form-modelos").innerHTML !== ""){
       document.getElementById("form-modelos").innerHTML = "";
@@ -240,6 +240,7 @@ document.getElementById("show-agentes").onclick = function(){
       </p>
       <p>      
         <button class="w3-btn w3-blue" id="agente-enviar">Enviar</button>
+        <button class="w3-btn w3-red" id="agente-borrar">BORRAR</button>
       </p>
     </div>
   </div>
@@ -290,6 +291,17 @@ document.getElementById("show-agentes").onclick = function(){
         } else {
             Prompts.update(agenteSelect,titulo,prompt,"");
         }
+        printAgentes();
+    }
+    document.getElementById("agente-borrar").onclick = function(event){
+        event.preventDefault();
+        if(agenteSelect === null || agenteSelect === "VACIO" || agenteSelect === "NUEVO"){
+            return;
+        }
+        Prompts.delete(agenteSelect);
+        document.getElementById("agente-titulo").value = "";
+        document.getElementById("agente-prompt").value = "";
+        agenteSelect === "VACIO"
         printAgentes();
     }
 };
