@@ -1052,13 +1052,13 @@ var Chat = (function(){
       let nuevaId,x;
       do {
         nuevaId = Tools.makeid(16);
-        x = localStorage.getItem("Chat-"+id);
+        x = localStorage.getItem("Chat-"+nuevaId);
       } while(x);
       let obj = {
         title: "Copia: "+idConversation+" en "+Date.now(),
       };
       localStorage.setItem("Chat-"+nuevaId, JSON.stringify(obj));  
-      for(let i=0; i<pos; i++){
+      for(let i=1; i<pos; i++){
         let msg = Object.assign({}, conversation[i]); // copia profunda
         let tmp = (msg.tmp && msg.tmp > 0) ? msg.tmp : Date.now() + i;
         msg.tmp = tmp;
