@@ -940,7 +940,7 @@ var Chat = (function(){
         let key = localStorage.key(i);
         if(key.includes("Chat-")){
           let obj = {
-              key: key.replace("Chat-","")ey,
+              key: key.replace("Chat-",""),
               titulo: ocalStorage.getItem(key)
           }
           res.push(obj);
