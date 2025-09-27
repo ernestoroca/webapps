@@ -142,12 +142,12 @@ function printConversacion(){
     for(let i=0;i<len;i++){
         let item = lista[i];
         if(item.role === "user"){
-          strHtml += `
+            strHtml += `
 <div class="w3-panel w3-pale-green w3-leftbar w3-border-green">
   <p>${item.content}</p>
 </div>`;
         } else {
-          strHtml += `
+            strHtml += `
 <div class="w3-panel w3-pale-red w3-leftbar w3-border-red">
   ${item.content}
 </div>
@@ -155,8 +155,8 @@ function printConversacion(){
   <button class="w3-button w3-round w3-blue" id="bifurcar-${i}">Bifurcar</button>
 </div>
 `;
+          lastPos = i;
         }
-        
     }
     document.getElementById("conversacion-chat").innerHTML = strHtml;
 }
@@ -170,12 +170,13 @@ window.onload = function(){
 var llmSelect = "mistralai";
 var modelSelect = "mistral-nemo:free";
 var agenteSelect = "VACIO";
+var lastPos = null;
 var chatSelect = null;
   
 document.getElementById("show-modelos").onclick = function(){
     if(document.getElementById("form-modelos").innerHTML !== ""){
-      document.getElementById("form-modelos").innerHTML = "";
-      return;
+        document.getElementById("form-modelos").innerHTML = "";
+        return;
     }
     document.getElementById("form-modelos").innerHTML = `
   <div class="w3-row">  
@@ -308,51 +309,56 @@ document.getElementById("show-agentes").onclick = function(){
 
 printChats();
 document.getElementById("lista-chats").onclick = function (event){
-        event.preventDefault();
-        let target = event.target;
-        while(target.id === ""){
-            target = target.parentNode;
-        }
-        if(!target.id.includes("Chat-")){
-            return;
-        }
-        document.getElementById("conversacion-chat").innerHTML = "";
-        document.getElementById("pregunta-chat").value = "";
+    event.preventDefault();
+    let target = event.target;
+    while(target.id === ""){
+        target = target.parentNode;
+    }
+    if(!target.id.includes("Chat-")){
+        return;
+    }
+    document.getElementById("conversacion-chat").innerHTML = "";
+    document.getElementById("pregunta-chat").value = "";
         
-        chatSelect = target.id.replace("Chat-","");
-        if(chatSelect !== "NUEVO"){
-            Chat.setParams(llmSelect,modelSelect,agenteSelect);
-            Chat.initChat(chatSelect);
-            printConversacion()
-        } else {
-            chatSelect = Chat.create("");
-            Chat.setParams(llmSelect,modelSelect,agenteSelect);
-            Chat.initChat(chatSelect);
-        }
+    chatSelect = target.id.replace("Chat-","");
+    if(chatSelect !== "NUEVO"){
+        Chat.setParams(llmSelect,modelSelect,agenteSelect);
+        Chat.initChat(chatSelect);
+        printConversacion()
+    } else {
+        chatSelect = Chat.create("");
+        Chat.setParams(llmSelect,modelSelect,agenteSelect);
+        Chat.initChat(chatSelect);
+    }
 }
 document.getElementById("pregunta-enviar").onclick = function(event){
-        event.preventDefault();
-        if(agenteSelect === null){
-            return;
-        }
-        let pregunta = document.getElementById("pregunta-chat").value.trim();
+    event.preventDefault();
+    if(agenteSelect === null){
+        return;
+    }
+    let pregunta = document.getElementById("pregunta-chat").value.trim();
         
-        if(pregunta === ""){
-            return;
-        }
-        Chat.ask(pregunta).then((respuesta)=>{
-          let div = document.createElement("div");
-          div.classList.add("w3-panel","w3-pale-green","w3-leftbar","w3-border-green");
-          div.innerHTML = "<p>"+pregunta+"</p>";
-          document.getElementById("conversacion-chat").appendChild(div);
+    if(pregunta === ""){
+        return;
+    }
+    Chat.ask(pregunta).then((respuesta)=>{
+        let div = document.createElement("div");
+        div.classList.add("w3-panel","w3-pale-green","w3-leftbar","w3-border-green");
+        div.innerHTML = "<p>"+pregunta+"</p>";
+        document.getElementById("conversacion-chat").appendChild(div);
 
-          div = document.createElement("div");
-          div.classList.add("w3-panel","w3-pale-red","w3-leftbar","w3-border-red");
-          div.innerHTML = respuesta.message;
-          document.getElementById("conversacion-chat").appendChild(div);
+        div = document.createElement("div");
+        div.classList.add("w3-panel","w3-pale-red","w3-leftbar","w3-border-red");
+        div.innerHTML = respuesta.message;
+        document.getElementById("conversacion-chat").appendChild(div);
 
-          document.getElementById("pregunta-chat").value = "";
-        });
+        lastPos +=2;
+        div = document.createElement("div");
+        div.innerHTML = `<button class="w3-button w3-round w3-blue" id="bifurcar-${lastPos}">Bifurcar</button>`;
+        document.getElementById("conversacion-chat").appendChild(div);
+        
+        document.getElementById("pregunta-chat").value = "";
+    });
 }
 document.getElementById("chat-borrar").onclick = function(event){
       event.preventDefault();
@@ -360,7 +366,22 @@ document.getElementById("chat-borrar").onclick = function(event){
       document.getElementById("conversacion-chat").innerHTML = "";
       printChats();
 }
-
+document.getElementById("conversacion-chat").onclick = function(event){
+    event.preventDefault();
+    let target = event.target;
+    while(target.id === ""){
+        target = target.parentNode;
+    }
+    if(arget.id === "conversacion-chat"){
+        return;
+    }
+    if(!target.id.includes("bifurcar-")){
+        return;
+    }
+    let pos = parseInt(target.id.replace("bifurcar-",""));
+    Chat.splitChat(pos);
+    printChats();
+};
 
 </script>
 </body>
