@@ -904,7 +904,7 @@ var Chat = (function(){
         return null;
       }
       return {
-          key; id,
+          key: id,
           titulo: str
       };
     },
