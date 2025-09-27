@@ -889,17 +889,13 @@ var Chat = (function(){
     });
 }
   return {
-    create: function(titulo){
-      let obj = {
-        title: titulo+":"+Date.now(),
-      };
-      let str = JSON.stringify(obj);
+    create: function(){
       let id,x;
       do {
         id = Tools.makeid(16);
         x = localStorage.getItem("Chat-"+id);
       } while(x);
-      localStorage.setItem("Chat-"+id,str);
+      localStorage.setItem("Chat-"+id,Date.now());
       return id;
     },
     read: function(id){
@@ -907,19 +903,17 @@ var Chat = (function(){
       if(!str){
         return null;
       }
-      let obj = JSON.parse(str);
-      return obj;
+      return {
+          key; id,
+          titulo: str
+      };
     },
     update: function(id,titulo){
       let str = localStorage.getItem("Chat-"+id);
       if(!str){
         return;
       }
-      let obj = JSON.parse(str);
-      obj.titulo = titulo;
-      str = JSON.stringify(obj);
-      localStorage.setItem("Chat-"+id,str);
-      return;
+      localStorage.setItem("Chat-"+id,titulo);
     },
     delete: function(id){
       localStorage.removeItem("Chat-"+id);
@@ -945,9 +939,10 @@ var Chat = (function(){
       for(let i=0;i<len;i++){
         let key = localStorage.key(i);
         if(key.includes("Chat-")){
-          let objStr = localStorage.getItem(key);
-          let obj = JSON.parse(objStr);
-          obj.key = key.replace("Chat-","");
+          let obj = {
+              key: key.replace("Chat-","")ey,
+              titulo: ocalStorage.getItem(key)
+          }
           res.push(obj);
         }
       }
@@ -964,6 +959,11 @@ var Chat = (function(){
                 "tmp": 0
             }
         }
+    },
+    setTitle: function(){
+      if(idConversation){
+          localStorage.setItem("Chat-"+idConversation,titulo);
+      }
     },
     initChat: function(id){
       last = 0;
@@ -1054,15 +1054,10 @@ var Chat = (function(){
         nuevaId = Tools.makeid(16);
         x = localStorage.getItem("Chat-"+nuevaId);
       } while(x);
-      let obj = {
-        title: "Copia: "+idConversation+" en "+Date.now(),
-      };
-      localStorage.setItem("Chat-"+nuevaId, JSON.stringify(obj));  
+      localStorage.setItem("Chat-"+nuevaId, Date.now());  
       for(let i=1; i<pos; i++){
-        let msg = Object.assign({}, conversation[i]); // copia profunda
-        let tmp = (msg.tmp && msg.tmp > 0) ? msg.tmp : Date.now() + i;
-        msg.tmp = tmp;
-        localStorage.setItem("Chat."+nuevaId+"-"+tmp, JSON.stringify(msg));
+        let msg = conversation[i];
+        localStorage.setItem("Chat."+nuevaId+"-"+msg.tmp , JSON.stringify(msg));
       }
       return nuevaId;
     }
