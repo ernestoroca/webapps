@@ -27,6 +27,16 @@
     <div class="w3-row">  
       <div class="w3-col s12" id="lista-chats"></div>
     </div>
+    <div class="w3-row">  
+      <div class="w3-col s12">
+        <p>
+          <input class="w3-input w3-border" name="titulo" type="text" id="titulo">
+        </p>
+        <p>
+          <button class="w3-btn w3-blue" id="titulo-enviar">Enviar</button>
+        </p>
+      </div>
+    </div>
     <div id="conversacion-chat"></div>
     <div class="w3-row">  
       <div class="w3-col s12">
@@ -324,13 +334,22 @@ document.getElementById("lista-chats").onclick = function (event){
     if(chatSelect !== "NUEVO"){
         Chat.setParams(llmSelect,modelSelect,agenteSelect);
         Chat.initChat(chatSelect);
+        let obj = Chat.read(chatSelect);
+        document.getElementById("titulo").value = obj.titulo;
         printConversacion()
     } else {
         chatSelect = Chat.create("");
         Chat.setParams(llmSelect,modelSelect,agenteSelect);
         Chat.initChat(chatSelect);
+        document.getElementById("titulo").value = "";
     }
 }
+document.getElementById("titulo-enviar").onclick = function(event){
+    let titulo = document.getElementById("titulo").value.trim();
+    if(titulo !== "" && chatSelect !== "NUEVO"){
+        Chat.setTitle(titulo);
+    }
+},
 document.getElementById("pregunta-enviar").onclick = function(event){
     event.preventDefault();
     if(agenteSelect === null){
