@@ -1048,5 +1048,23 @@ var Chat = (function(){
       }
       return conversation.slice(min,len);
     },
+    splitChat: function(pos){
+      let nuevaId,x;
+      do {
+        nuevaId = Tools.makeid(16);
+        x = localStorage.getItem("Chat-"+id);
+      } while(x);
+      let obj = {
+        title: "Copia: "+idConversation+" en "+Date.now(),
+      };
+      localStorage.setItem("Chat-"+nuevaId, JSON.stringify(obj));  
+      for(let i=0; i<pos; i++){
+        let msg = Object.assign({}, conversation[i]); // copia profunda
+        let tmp = (msg.tmp && msg.tmp > 0) ? msg.tmp : Date.now() + i;
+        msg.tmp = tmp;
+        localStorage.setItem("Chat."+nuevaId+"-"+tmp, JSON.stringify(msg));
+      }
+      return nuevaId;
+    }
   }
 }());
