@@ -248,11 +248,11 @@ var Llms = (function(){
 
 var Prompts = (function(){
     return {
-        create: function(label,system,user){
+        create: function(label,title,system){
             let obj = {
                 label: label,
-                system: system,
-                user: user
+                title: title,
+                system: system
             };
             let str = JSON.stringify(obj);
             let id,x;
@@ -270,11 +270,11 @@ var Prompts = (function(){
             let obj = JSON.parse(str);
             return obj;
         },
-        update: function(id,label,system,user){
+        update: function(id,label,title,system){
             let obj = {
                 label: label,
-                system: system,
-                user: user
+                title: title,
+                system: system
             };
             let str = JSON.stringify(obj);
             localStorage.setItem("Prompt-"+id,str);
