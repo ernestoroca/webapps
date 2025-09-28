@@ -960,7 +960,7 @@ var Chat = (function(){
             }
         }
     },
-    setTitle: function(){
+    setTitle: function(titulo){
       if(idConversation){
           localStorage.setItem("Chat-"+idConversation,titulo);
       }
