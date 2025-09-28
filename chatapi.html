@@ -130,7 +130,8 @@ function printAgentes(){
     let len = lista.length;
     let strHtml = `<button class="w3-button w3-round w3-blue" id="agente-VACIO">Vacío</button>`;
     for(let i=0;i<len;i++){
-        strHtml += `<button class="w3-button w3-round w3-blue" id="agente-${lista[i]}">${lista[i].label}</button>`;
+        let item = Prompts.read(lista[i]);
+        strHtml += `<button class="w3-button w3-round w3-blue" id="agente-${lista[i]}">${item.label}</button>`;
     }
     strHtml += `<button class="w3-button w3-round w3-blue" id="agente-NUEVO">+</button>`;
     document.getElementById("lista-agentes").innerHTML = strHtml;
