@@ -265,7 +265,6 @@ document.getElementById("show-agentes").onclick = function(){
   </div>
     `;
     
-    printAgentes();
     document.getElementById("lista-agentes").onclick = function (event){
         let label,prompt,titulo
         event.preventDefault();
@@ -327,6 +326,13 @@ document.getElementById("show-agentes").onclick = function(){
         agenteSelect === "VACIO"
         printAgentes();
     }
+    printAgentes();
+    if(agenteSelect !== "VACIO" &&  agenteSelect !== ""NUEVO){
+        let unPrompt = Prompts.read(agenteSelect);
+        document.getElementById("agente-label").value = unPrompt.label;
+        document.getElementById("agente-titulo").value = unPrompt.title;
+        document.getElementById("agente-prompt").value = prompt.system;
+    }        
 };
   
 document.getElementById("lista-chats").onclick = function (event){
