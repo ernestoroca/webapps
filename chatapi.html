@@ -327,7 +327,7 @@ document.getElementById("show-agentes").onclick = function(){
         printAgentes();
     }
     printAgentes();
-    if(agenteSelect !== "VACIO" &&  agenteSelect !== ""NUEVO){
+    if(agenteSelect !== "VACIO" &&  agenteSelect !== "NUEVO"){
         let unPrompt = Prompts.read(agenteSelect);
         document.getElementById("agente-label").value = unPrompt.label;
         document.getElementById("agente-titulo").value = unPrompt.title;
