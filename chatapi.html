@@ -130,7 +130,7 @@ function printAgentes(){
     let len = lista.length;
     let strHtml = `<button class="w3-button w3-round w3-blue" id="agente-VACIO">Vacío</button>`;
     for(let i=0;i<len;i++){
-        strHtml += `<button class="w3-button w3-round w3-blue" id="agente-${lista[i]}">${lista[i]}</button>`;
+        strHtml += `<button class="w3-button w3-round w3-blue" id="agente-${lista[i]}">${lista[i].label}</button>`;
     }
     strHtml += `<button class="w3-button w3-round w3-blue" id="agente-NUEVO">+</button>`;
     document.getElementById("lista-agentes").innerHTML = strHtml;
@@ -177,6 +177,7 @@ function printConversacion(){
 window.onload = function(){
     formKey();
     Llms.init();
+    printChats();
 };
 
 var llmSelect = "mistralai";
@@ -244,6 +245,10 @@ document.getElementById("show-agentes").onclick = function(){
   <div class="w3-row">  
     <div class="w3-col s12">
       <p>      
+        <label class="w3-text-blue"><b>Etiqueta</b></label>
+        <input class="w3-input w3-border" name="agente-label" type="text" id="agente-label">
+      </p>
+      <p>      
         <label class="w3-text-blue"><b>Título</b></label>
         <input class="w3-input w3-border" name="agente-titulo" type="text" id="agente-titulo">
       </p>
@@ -257,11 +262,11 @@ document.getElementById("show-agentes").onclick = function(){
       </p>
     </div>
   </div>
-    
     `;
     
     printAgentes();
     document.getElementById("lista-agentes").onclick = function (event){
+        let label,prompt,titulo
         event.preventDefault();
         let target = event.target;
         while(target.id === ""){
@@ -272,18 +277,22 @@ document.getElementById("show-agentes").onclick = function(){
         }
         agenteSelect = target.id.replace("agente-","");
         if(agenteSelect === "VACIO"){
+            label = "VACIO";
             titulo = "VACIO";
             prompt = "VACIO";
             Chat.setParams(llmSelect,modelSelect,agenteSelect);
         } else if(agenteSelect === "NUEVO"){
+            label = "";
             titulo = "";
             prompt = "";
         } else {
             let unPrompt = Prompts.read(agenteSelect);
-            titulo = unPrompt.label;
+            label = unPrompt.label;
+            titulo = unPrompt.title;
             prompt = unPrompt.system;
             Chat.setParams(llmSelect,modelSelect,agenteSelect);
         }
+        document.getElementById("agente-label").value = label;
         document.getElementById("agente-titulo").value = titulo;
         document.getElementById("agente-prompt").value = prompt;
     }
@@ -295,14 +304,14 @@ document.getElementById("show-agentes").onclick = function(){
         if(agenteSelect === "VACIO"){
             return;
         }
-        
-        let titulo = document.getElementById("agente-titulo").value;
-        let prompt = document.getElementById("agente-prompt").value;
+        let label = document.getElementById("agente-titulo").value.trim();
+        let titulo = document.getElementById("agente-titulo").value.trim();
+        let prompt = document.getElementById("agente-prompt").value.trim();
         
         if(agenteSelect === "NUEVO"){
-            Prompts.create(titulo,prompt,"");
+            Prompts.create(label,titulo,prompt);
         } else {
-            Prompts.update(agenteSelect,titulo,prompt,"");
+            Prompts.update(agenteSelect,label,titulo,prompt);
         }
         printAgentes();
     }
@@ -318,8 +327,7 @@ document.getElementById("show-agentes").onclick = function(){
         printAgentes();
     }
 };
-
-printChats();
+  
 document.getElementById("lista-chats").onclick = function (event){
     event.preventDefault();
     let target = event.target;
