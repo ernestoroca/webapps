@@ -36,6 +36,7 @@
         </p>
         <p>
           <button class="w3-btn w3-blue" id="titulo-enviar">Enviar</button>
+          <button class="w3-btn w3-red" id="chat-borrar">BORRAR</button>
         </p>
       </div>
     </div>
@@ -47,7 +48,6 @@
         </p>
         <p>      
           <button class="w3-btn w3-blue" id="pregunta-enviar">Enviar</button>
-          <button class="w3-btn w3-red" id="chat-borrar">BORRAR</button>
         </p>
       </div>
     </div>
@@ -355,10 +355,11 @@ document.getElementById("lista-chats").onclick = function (event){
         document.getElementById("titulo").value = obj.titulo;
         printConversacion()
     } else {
-        chatSelect = Chat.create("");
+        chatSelect = Chat.create();
         Chat.setParams(llmSelect,modelSelect,agenteSelect);
         Chat.initChat(chatSelect);
         document.getElementById("titulo").value = "";
+        printChats();
     }
 }
 document.getElementById("titulo-enviar").onclick = function(event){
