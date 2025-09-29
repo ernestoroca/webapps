@@ -1055,7 +1055,7 @@ var Chat = (function(){
         x = localStorage.getItem("Chat-"+nuevaId);
       } while(x);
       localStorage.setItem("Chat-"+nuevaId, Date.now());  
-      for(let i=1; i<pos; i++){
+      for(let i=1; i<pos+2; i++){
         let msg = conversation[i];
         localStorage.setItem("Chat."+nuevaId+"-"+msg.tmp , JSON.stringify(msg));
       }
