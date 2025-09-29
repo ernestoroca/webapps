@@ -351,16 +351,15 @@ document.getElementById("lista-chats").onclick = function (event){
     if(chatSelect !== "NUEVO"){
         Chat.setParams(llmSelect,modelSelect,agenteSelect);
         Chat.initChat(chatSelect);
-        let obj = Chat.read(chatSelect);
-        document.getElementById("titulo").value = obj.titulo;
         printConversacion()
     } else {
         chatSelect = Chat.create();
         Chat.setParams(llmSelect,modelSelect,agenteSelect);
         Chat.initChat(chatSelect);
-        document.getElementById("titulo").value = "";
         printChats();
     }
+    let obj = Chat.read(chatSelect);
+    document.getElementById("titulo").value = obj.titulo;
 }
 document.getElementById("titulo-enviar").onclick = function(event){
     let titulo = document.getElementById("titulo").value.trim();
@@ -402,6 +401,7 @@ document.getElementById("chat-borrar").onclick = function(event){
       event.preventDefault();
       Chat.delete(chatSelect);
       document.getElementById("conversacion-chat").innerHTML = "";
+      document.getElementById("titulo").value = "";
       printChats();
 }
 document.getElementById("conversacion-chat").onclick = function(event){
